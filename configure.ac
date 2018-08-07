@@ -25,6 +25,8 @@ AM_SILENT_RULES([yes])
 
 # Checks for header files.
 AC_CHECK_HEADERS([unistd.h])
+AC_CHECK_HEADERS([stdbool.h])
+AC_CHECK_HEADERS([xmmintrin.h])
 
 # Check for GASPI
 AX_CHECK_GASPI
