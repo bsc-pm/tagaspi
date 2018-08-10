@@ -57,20 +57,24 @@ int poll_queues(void *data)
 		
 		do {
 			repeat_queue = false;
+			completed_reqs = 0;
+			
 			eret = gaspi_request_wait(queue, NUM_REQUESTS, &completed_reqs, requests, GASPI_TEST);
 			assert(eret == GASPI_SUCCESS || eret == GASPI_TIMEOUT);
-			if (eret == GASPI_SUCCESS) {
-				for (i = 0; i < completed_reqs; ++i) {
-					gaspi_request_get_tag(&requests[i], (gaspi_tag_t *) &event_counter);
-					assert(event_counter != NULL);
-					
-					gaspi_request_get_status(&requests[i], &status);
-					assert(status == GASPI_SUCCESS);
-					
-					nanos_decrease_task_event_counter(event_counter, 1);
-				}
-				repeat_queue = (completed_reqs == NUM_REQUESTS);
+			assert(completed_reqs <= NUM_REQUESTS);
+			
+			for (i = 0; i < completed_reqs; ++i) {
+				eret = gaspi_request_get_tag(&requests[i], (gaspi_tag_t *) &event_counter);
+				assert(eret == GASPI_SUCCESS);
+				assert(event_counter != NULL);
+				
+				eret = gaspi_request_get_status(&requests[i], &status);
+				assert(eret == GASPI_SUCCESS);
+				assert(status == GASPI_SUCCESS);
+				
+				nanos_decrease_task_event_counter(event_counter, 1);
 			}
+			repeat_queue = (completed_reqs == NUM_REQUESTS);
 		} while (repeat_queue);
 		
 		spinlock_unlock(&glb_env.queue_polling_locks[queue]);

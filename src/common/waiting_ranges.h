@@ -41,7 +41,7 @@ waiting_range_check(waiting_range_t *wr)
 		
 		if (notified_value != 0) {
 			if (wr->notified_values != NULL) {
-				wr->notified_values[notified_id] = notified_value;
+				wr->notified_values[notified_id - wr->first_id] = notified_value;
 			}
 		
 			completed = (--wr->remaining == 0);

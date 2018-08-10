@@ -17,7 +17,7 @@ void initialize()
 	assert(!glb_env.enabled);
 	
 	gaspi_queue_max(&glb_env.max_queues);
-	gaspi_segment_max(&glb_env.max_queues);
+	gaspi_segment_max(&glb_env.max_segments);
 	assert(glb_env.max_queues > 0);
 	assert(glb_env.max_segments > 0);
 	

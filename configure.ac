@@ -13,6 +13,8 @@ AC_LANG([C])
 # Check if debug mode is enabled
 AX_DEBUG_MODE
 
+: ${CFLAGS=""}
+
 # Look for a valid C compiler
 AC_PROG_CC
 
