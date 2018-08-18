@@ -25,7 +25,7 @@ tagaspi_queue_group_create(const gaspi_queue_group_id_t queue_group_id,
 {
 	assert(queue_group_id < glb_env.max_queue_groups);
 	assert(queue_begin < glb_env.max_queues);
-	assert(queue_begin + queue_num < glb_env.max_queues);
+	assert(queue_begin + queue_num <= glb_env.max_queues);
 	assert(queue_num > 0);
 	
 	gaspi_return_t eret = GASPI_SUCCESS;
