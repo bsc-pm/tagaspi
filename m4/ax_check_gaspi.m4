@@ -80,7 +80,7 @@ AC_MSG_CHECKING([which implementation to target])
     AC_CHECK_HEADERS([GASPI_Lowlevel.h], [gaspi=yes; break], [gaspi=no])
   ])
   search_lib=GPI2
-  required_libs="-lpthread"
+  required_libs="-lpthread -libverbs"
 
 
 m4_foreach([function],
