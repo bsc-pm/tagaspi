@@ -8,6 +8,7 @@
 #define WAITING_RANGES_H
 
 #include <GASPI.h>
+#include <TAGASPI.h>
 
 #include "environment.h"
 #include "mpsc_queue.h"
@@ -40,10 +41,10 @@ waiting_range_check(waiting_range_t *wr)
 		assert(eret == GASPI_SUCCESS);
 		
 		if (notified_value != 0) {
-			if (wr->notified_values != NULL) {
+			if (wr->notified_values != GASPI_NOTIFICATION_IGNORE) {
 				wr->notified_values[notified_id - wr->first_id] = notified_value;
 			}
-		
+			
 			completed = (--wr->remaining == 0);
 		}
 	}

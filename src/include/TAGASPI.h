@@ -14,6 +14,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+	
+#define GASPI_NOTIFICATION_IGNORE (gaspi_notification_t *)0
+	
 	typedef unsigned char gaspi_queue_group_id_t;
 	
 	typedef enum
