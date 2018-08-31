@@ -111,7 +111,6 @@ int poll_notifications(void *data)
 			while (completed != NULL) {
 				waiting_range_t *aux = completed->next;
 				nanos_decrease_task_event_counter(completed->event_counter, completed->num_ids);
-				free(completed);
 				completed = aux;
 			}
 		} while (repeat_seg);

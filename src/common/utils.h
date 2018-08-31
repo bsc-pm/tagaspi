@@ -7,6 +7,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <assert.h>
 #include <xmmintrin.h>
 
 #define MIN(a,b)  (((a)>(b)) ? (b) : (a))
@@ -30,5 +31,7 @@
 typedef size_t mask_t;
 
 #define ALIGN64 __attribute__ ((aligned (64)))
+
+#define CHECK_SIZE(a, b) static_assert(sizeof(a) == sizeof(b), "Types have different size")
 
 #endif /* UTILS_H */
