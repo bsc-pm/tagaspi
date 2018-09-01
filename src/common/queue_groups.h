@@ -15,6 +15,7 @@
 #include "utils.h"
 
 #include <assert.h>
+#include <stddef.h>
 #include <sys/sysinfo.h>
 
 struct queue_range_t {

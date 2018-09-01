@@ -8,6 +8,7 @@
 #define UTILS_H
 
 #include <assert.h>
+#include <stddef.h>
 #include <xmmintrin.h>
 
 #define MIN(a,b)  (((a)>(b)) ? (b) : (a))
