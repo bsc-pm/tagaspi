@@ -23,18 +23,18 @@ void polling_initialize()
 {
 	gaspi_number_t queue;
 	for (queue = 0; queue < glb_env.max_queues; queue += QUEUES_PER_SERVICE) {
-		nanos_register_polling_service("TAGASPI QUEUE POLLING", poll_queues, (void*)(uintptr_t)queue);
+		nanos6_register_polling_service("TAGASPI QUEUE POLLING", poll_queues, (void*)(uintptr_t)queue);
 	}
-	nanos_register_polling_service("TAGASPI NOTIFICATION POLLING", poll_notifications, NULL);
+	nanos6_register_polling_service("TAGASPI NOTIFICATION POLLING", poll_notifications, NULL);
 }
 
 void polling_finalize()
 {
 	gaspi_number_t queue;
 	for (queue = 0; queue < glb_env.max_queues; queue += QUEUES_PER_SERVICE) {
-		nanos_unregister_polling_service("TAGASPI QUEUE POLLING", poll_queues, (void*)(uintptr_t)queue);
+		nanos6_unregister_polling_service("TAGASPI QUEUE POLLING", poll_queues, (void*)(uintptr_t)queue);
 	}
-	nanos_unregister_polling_service("TAGASPI NOTIFICATION POLLING", poll_notifications, NULL);
+	nanos6_unregister_polling_service("TAGASPI NOTIFICATION POLLING", poll_notifications, NULL);
 }
 
 int poll_queues(void *data)
@@ -72,7 +72,7 @@ int poll_queues(void *data)
 				assert(eret == GASPI_SUCCESS);
 				assert(status == GASPI_SUCCESS);
 				
-				nanos_decrease_task_event_counter(event_counter, 1);
+				nanos6_decrease_task_event_counter(event_counter, 1);
 			}
 			repeat_queue = (completed_reqs == NUM_REQUESTS);
 		} while (repeat_queue);
@@ -110,7 +110,7 @@ int poll_notifications(void *data)
 			
 			while (completed != NULL) {
 				waiting_range_t *aux = completed->next;
-				nanos_decrease_task_event_counter(completed->event_counter, completed->num_ids);
+				nanos6_decrease_task_event_counter(completed->event_counter, completed->num_ids);
 				completed = aux;
 			}
 		} while (repeat_seg);

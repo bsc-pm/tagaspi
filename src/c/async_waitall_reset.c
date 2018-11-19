@@ -23,7 +23,7 @@ tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t segment_id,
 {
 	CHECK_SIZE(waiting_range_t, gaspi_notification_info_t);
 	assert(glb_env.enabled);
-	assert(!nanos_in_serial_context());
+	assert(!nanos6_in_serial_context());
 	assert(segment_id < glb_env.max_segments);
 	
 	if (num == 0) return GASPI_SUCCESS;
@@ -32,7 +32,7 @@ tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t segment_id,
 	waiting_range_t *wr = (waiting_range_t *) notification_info;
 	assert(wr != NULL);
 	
-	void *counter = nanos_get_current_event_counter();
+	void *counter = nanos6_get_current_event_counter();
 	assert(counter != NULL);
 	
 	// Initialize the waiting range
@@ -44,7 +44,7 @@ tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t segment_id,
 	wr->event_counter = counter;
 	wr->next = NULL;
 	
-	nanos_increase_current_task_event_counter(counter, num);
+	nanos6_increase_current_task_event_counter(counter, num);
 	
 	waiting_range_queue_enqueue(&glb_env.waiting_range_queues[segment_id], wr);
 	

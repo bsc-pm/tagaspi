@@ -23,10 +23,10 @@ tagaspi_read(const gaspi_segment_id_t segment_id_local,
 		const gaspi_timeout_t timeout_ms)
 {
 	assert(glb_env.enabled);
-	assert(!nanos_in_serial_context());
+	assert(!nanos6_in_serial_context());
 	gaspi_return_t eret;
 	
-	void *counter = nanos_get_current_event_counter();
+	void *counter = nanos6_get_current_event_counter();
 	assert(counter != NULL);
 	
 	gaspi_tag_t tag = (gaspi_tag_t) counter;
@@ -36,7 +36,7 @@ tagaspi_read(const gaspi_segment_id_t segment_id_local,
 	assert(eret == GASPI_SUCCESS);
 	assert(num_requests > 0);
 	
-	nanos_increase_current_task_event_counter(counter, num_requests);
+	nanos6_increase_current_task_event_counter(counter, num_requests);
 	
 	eret = gaspi_operation_submit(GASPI_OP_READ, tag,
 				segment_id_local, offset_local, rank,
@@ -44,7 +44,7 @@ tagaspi_read(const gaspi_segment_id_t segment_id_local,
 				0, 0, queue, timeout_ms);
 	
 	if (eret != GASPI_SUCCESS) {
-		nanos_decrease_task_event_counter(counter, num_requests);
+		nanos6_decrease_task_event_counter(counter, num_requests);
 	}
 	
 	return eret;

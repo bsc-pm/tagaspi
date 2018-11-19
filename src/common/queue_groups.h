@@ -29,16 +29,16 @@ queue_group_get_system_usage_info(size_t max_cpus, size_t *num_cpus, size_t numa
 	assert(num_cpus != NULL);
 	assert(numa_ids != NULL);
 	
-	*num_cpus = nanos_get_num_cpus();
+	*num_cpus = nanos6_get_num_cpus();
 	assert(*num_cpus <= max_cpus);
 	assert(*num_cpus > 0);
 	
 	size_t cpu = 0;
-	void *cpu_it = nanos_cpus_begin();
-	while (cpu_it != nanos_cpus_end()) {
-		size_t numa = nanos_cpus_get_numa(cpu_it);
+	void *cpu_it = nanos6_cpus_begin();
+	while (cpu_it != nanos6_cpus_end()) {
+		size_t numa = nanos6_cpus_get_numa(cpu_it);
 		numa_ids[cpu] = numa;
-		cpu_it = nanos_cpus_advance(cpu_it);
+		cpu_it = nanos6_cpus_advance(cpu_it);
 		++cpu;
 	}
 	assert(*num_cpus == cpu);
@@ -180,7 +180,7 @@ queue_group_get_queue(queue_group_t *group, gaspi_queue_id_t *queue)
 		}
 		*queue = group->first_id + offset;
 	} else if (group->policy == GASPI_QUEUE_GROUP_POLICY_CPU_RR) {
-		size_t cpu = nanos_get_current_virtual_cpu();
+		size_t cpu = nanos6_get_current_virtual_cpu();
 		gaspi_queue_id_t * queues = (gaspi_queue_id_t *)group->data;
 		*queue = queues[cpu];
 	} else {
