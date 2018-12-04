@@ -4,15 +4,11 @@
 	Copyright (C) 2015-2018 Barcelona Supercomputing Center (BSC)
 */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
-#include <assert.h>
-#include <stddef.h>
+#include <cstddef>
 #include <xmmintrin.h>
-
-#define MIN(a,b)  (((a)>(b)) ? (b) : (a))
-#define MAX(a,b)  (((a)>(b)) ? (a) : (b))
 
 #ifdef NDEBUG
 #define UNUSED(_var) (void)(_var)
@@ -31,8 +27,4 @@
 
 typedef size_t mask_t;
 
-#define ALIGN64 __attribute__ ((aligned (64)))
-
-#define CHECK_SIZE(a, b) static_assert(sizeof(a) == sizeof(b), "Types have different size")
-
-#endif /* UTILS_H */
+#endif /* UTILS_HPP */

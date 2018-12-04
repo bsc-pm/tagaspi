@@ -6,22 +6,35 @@
 
 #include <GASPI.h>
 
-#include "environment.h"
+#include "common/Environment.hpp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 gaspi_return_t
 tagaspi_proc_init(const gaspi_timeout_t timeout_ms)
 {
-	assert(!glb_env.enabled);
+	assert(!_env.enabled);
 	
 	gaspi_return_t eret;
 	eret = gaspi_proc_init(timeout_ms);
-	if (eret == GASPI_SUCCESS) initialize();
+	if (eret == GASPI_SUCCESS) {
+		Environment::initialize();
+	}
 	return eret;
 }
 
 gaspi_return_t
 tagaspi_proc_term(const gaspi_timeout_t timeout_ms)
 {
-	if (glb_env.enabled) finalize();
+	if (_env.enabled) {
+		Environment::finalize();
+	}
 	return gaspi_proc_term(timeout_ms);
 }
+
+#ifdef __cplusplus
+}
+#endif
+

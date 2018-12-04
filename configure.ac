@@ -8,15 +8,15 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([config.h])
 
-AC_LANG([C])
+AC_LANG([C++])
 
 # Check if debug mode is enabled
 AX_DEBUG_MODE
 
 : ${CFLAGS=""}
 
-# Look for a valid C compiler
-AC_PROG_CC
+# Look for a valid C++ compiler
+AC_PROG_CXX
 
 # AM_PROG_AR must be called before LT_INIT or a warning ensues
 AM_PROG_AR
@@ -27,14 +27,13 @@ AM_SILENT_RULES([yes])
 
 # Checks for header files.
 AC_CHECK_HEADERS([unistd.h])
-AC_CHECK_HEADERS([stdbool.h])
 AC_CHECK_HEADERS([xmmintrin.h])
 
 # Check for GASPI
 AX_CHECK_GASPI
 
-# Check for EXTRAE
-AX_CHECK_EXTRAE
+# Check for Boost
+AX_BOOST_BASE([1.59], [], [ AC_MSG_ERROR([Boost library not found])])
 
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_SIZE_T
@@ -52,6 +51,12 @@ AS_IF([test "$ARCH" = "x86_64"],[
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
-echo "- Task-aware GASPI library -"
-echo "       - Configuration summary -"
-echo "Installation prefix: $prefix"
+echo ""
+echo ""
+echo "Configuration summary:"
+echo "    Installation prefix... ${prefix}"
+echo ""
+echo "    GASPI CPPFLAGS... ${gaspiinc}"
+echo ""
+echo "    Boost CPPFLAGS... ${BOOST_CPPFLAGS}"
+echo "    Boost LDFLAGS... ${BOOST_LDFLAGS}"

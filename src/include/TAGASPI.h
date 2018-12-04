@@ -18,15 +18,6 @@ extern "C" {
 #define GASPI_NOTIFICATION_IGNORE (gaspi_notification_t *)0
 	
 	typedef unsigned char gaspi_queue_group_id_t;
-	typedef struct {
-		gaspi_segment_id_t __a;
-		gaspi_notification_id_t __b;
-		gaspi_number_t __c;
-		gaspi_notification_t *__d;
-		gaspi_number_t __e;
-		void * __f;
-		void * __g;
-	} gaspi_notification_info_t;
 	
 	typedef enum
 	{
@@ -129,7 +120,6 @@ extern "C" {
 	tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t segment_id_local,
 			const gaspi_notification_id_t notification_begin,
 			const gaspi_number_t num,
-			gaspi_notification_info_t * const notification_info,
 			gaspi_notification_t old_notification_values[]);
 	
 	gaspi_return_t
