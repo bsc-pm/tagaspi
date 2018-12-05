@@ -7,24 +7,26 @@
 #include <GASPI.h>
 #include <GASPI_Lowlevel.h>
 
-#include "environment.h"
-#include "runtime_api.h"
+#include "common/Environment.hpp"
+#include "common/RuntimeAPI.hpp"
 
-#include <assert.h>
+#include <cassert>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 gaspi_return_t
-tagaspi_write_notify(const gaspi_segment_id_t segment_id_local,
+tagaspi_read(const gaspi_segment_id_t segment_id_local,
 		const gaspi_offset_t offset_local,
 		const gaspi_rank_t rank,
 		const gaspi_segment_id_t segment_id_remote,
 		const gaspi_offset_t offset_remote,
 		const gaspi_size_t size,
-		const gaspi_notification_id_t notification_id,
-		const gaspi_notification_t notification_value,
 		const gaspi_queue_id_t queue,
 		const gaspi_timeout_t timeout_ms)
 {
-	assert(glb_env.enabled);
+	assert(_env.enabled);
 	assert(!nanos6_in_serial_context());
 	gaspi_return_t eret;
 	
@@ -33,22 +35,26 @@ tagaspi_write_notify(const gaspi_segment_id_t segment_id_local,
 	
 	gaspi_tag_t tag = (gaspi_tag_t) counter;
 	
-	gaspi_number_t num_requests = 0;
-	eret = gaspi_operation_get_num_requests(GASPI_OP_WRITE_NOTIFY, 0, &num_requests);
+	gaspi_number_t numRequests = 0;
+	eret = gaspi_operation_get_num_requests(GASPI_OP_READ, 0, &numRequests);
 	assert(eret == GASPI_SUCCESS);
-	assert(num_requests > 0);
+	assert(numRequests > 0);
 	
-	nanos6_increase_current_task_event_counter(counter, num_requests);
+	nanos6_increase_current_task_event_counter(counter, numRequests);
 	
-	eret = gaspi_operation_submit(GASPI_OP_WRITE_NOTIFY, tag,
+	eret = gaspi_operation_submit(GASPI_OP_READ, tag,
 				segment_id_local, offset_local, rank,
 				segment_id_remote, offset_remote, size,
-				notification_id, notification_value,
-				queue, timeout_ms);
+				0, 0, queue, timeout_ms);
 	
 	if (eret != GASPI_SUCCESS) {
-		nanos6_decrease_task_event_counter(counter, num_requests);
+		nanos6_decrease_task_event_counter(counter, numRequests);
 	}
 	
 	return eret;
 }
+
+#ifdef __cplusplus
+}
+#endif
+

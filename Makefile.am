@@ -6,45 +6,45 @@ EXTRA_DIST=\
 
 AM_CPPFLAGS=\
  @gaspiinc@ \
- @extraeinc@ \
+ $(BOOST_CPPFLAGS) -DBOOST_ENABLE_ASSERT_DEBUG_HANDLER \
  -I@top_srcdir@/src \
- -I@top_srcdir@/src/common \
  -I@top_srcdir@/src/include \
  -include "config.h" \
  $(CPPFLAGS)
 
 if debug_mode_enabled
-AM_CFLAGS=-O0 -g3 -Wall -Wextra $(CFLAGS)
+AM_CXXFLAGS=-O0 -g3 -std=c++11 -Wall -Wextra $(CXXFLAGS)
 else
-AM_CFLAGS=-O3 -fno-exceptions -Wall -Wextra $(CFLAGS)
+AM_CXXFLAGS=-O3 -std=c++11 -fno-exceptions -Wall -Wextra $(CXXFLAGS)
 endif
 
-AM_LDFLAGS=@extraelib@ -ldl $(LDFLAGS)
-LIBS=@extraelibs@
+AM_LDFLAGS=$(BOOST_LDFLAGS) -ldl $(LDFLAGS)
+LIBS=
 
 include_HEADERS= src/include/TAGASPI.h
 pkginclude_HEADERS= # This library does not provide any additional header
 
 c_api_sources=               \
- src/c/init.c                \
- src/c/write.c               \
- src/c/read.c                \
- src/c/notify.c              \
- src/c/write_notify.c        \
- src/c/write_list.c          \
- src/c/read_list.c           \
- src/c/write_list_notify.c   \
- src/c/async_waitall_reset.c \
- src/c/queue_groups.c
+ src/c/Initialization.cpp    \
+ src/c/Write.cpp             \
+ src/c/Read.cpp              \
+ src/c/Notify.cpp            \
+ src/c/WriteNotify.cpp       \
+ src/c/WriteList.cpp         \
+ src/c/ReadList.cpp          \
+ src/c/WriteListNotify.cpp   \
+ src/c/AsyncWaitallReset.cpp \
+ src/c/QueueGroups.cpp
 
 fortran_api_sources=
 
-common_sources=           \
- src/common/environment.c \
- src/common/polling.c
+common_sources=             \
+ src/common/Allocator.cpp   \
+ src/common/Environment.cpp \
+ src/common/Polling.cpp
 
 lib_LTLIBRARIES=libtagaspi.la libtagaspi-c.la
 libtagaspi_la_SOURCES=$(common_sources) $(c_api_sources) $(fortran_api_sources)
 libtagaspi_c_la_SOURCES=$(common_sources) $(c_api_sources)
-libtagaspi_fortran_la_SOURCES=$(common_sources) $(fortran_api_sources)
+#libtagaspi_fortran_la_SOURCES=$(common_sources) $(fortran_api_sources)
 
