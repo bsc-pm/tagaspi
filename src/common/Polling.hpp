@@ -16,8 +16,11 @@
 
 class Polling {
 private:
-	static const unsigned int NUM_REQUESTS = 16;
-	static const unsigned int QUEUES_PER_SERVICE = 4;
+	/* Number of requests checked per gaspi_request_wait call */
+	static const unsigned int NREQ = 16;
+	
+	/* Number of queues per polling service */
+	static const unsigned int QPPS = 4;
 	
 public:
 	static void initialize();

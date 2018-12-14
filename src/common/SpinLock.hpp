@@ -22,7 +22,7 @@ private:
 	char _padding[64 - sizeof(std::atomic<bool>)];
 	
 public:
-	SpinLock() :
+	inline SpinLock() :
 		_lock(false),
 		_padding()
 	{}
@@ -30,12 +30,12 @@ public:
 	SpinLock(const SpinLock &) = delete;
 	SpinLock(SpinLock &&) = delete;
 	
-	~SpinLock()
+	inline ~SpinLock()
 	{
 		assert(!_lock.load());
 	}
 	
-	void lock()
+	inline void lock()
 	{
 		bool expected = false;
 		while (!_lock.compare_exchange_weak(expected, true, std::memory_order_acquire)) {
@@ -48,13 +48,13 @@ public:
 		}
 	}
 	
-	bool trylock()
+	inline bool trylock()
 	{
 		bool expected = false;
 		return _lock.compare_exchange_strong(expected, true, std::memory_order_acquire);
 	}
 	
-	void unlock()
+	inline void unlock()
 	{
 		assert(_lock.load());
 		_lock.store(false, std::memory_order_release);

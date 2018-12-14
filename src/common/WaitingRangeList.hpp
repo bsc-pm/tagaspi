@@ -17,23 +17,23 @@ private:
 	std::list<WaitingRange*> _list;
 	
 public:
-	WaitingRangeList() :
+	inline WaitingRangeList() :
 		_list()
 	{}
 	
-	~WaitingRangeList()
+	inline ~WaitingRangeList()
 	{
 		assert(_list.empty());
 	}
 	
-	void splice(std::list<WaitingRange*> &pendingRanges) {
+	inline void splice(std::list<WaitingRange*> &pendingRanges) {
 		if (!pendingRanges.empty()) {
 			_list.splice(_list.end(), pendingRanges);
 		}
 		assert(pendingRanges.empty());
 	}
 	
-	void checkNotifications(std::list<WaitingRange*> &completeRanges)
+	inline void checkNotifications(std::list<WaitingRange*> &completeRanges)
 	{
 		auto it = _list.begin();
 		while (it != _list.end()) {
@@ -49,7 +49,7 @@ public:
 		}
 	}
 	
-	bool empty() const
+	inline bool empty() const
 	{
 		return _list.empty();
 	}

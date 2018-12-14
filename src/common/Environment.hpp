@@ -14,8 +14,11 @@
 #include "QueueGroup.hpp"
 #include "SpinLock.hpp"
 
+
 class Environment {
 public:
+	static const int MAX_QUEUE_GROUPS = 16;
+	
 	bool enabled;
 	gaspi_number_t maxQueues;
 	gaspi_number_t maxSegments;

@@ -10,8 +10,9 @@
 #include <GASPI.h>
 #include <TAGASPI.h>
 
-#include <cassert>
+#include "Polling.hpp"
 
+#include <cassert>
 
 class WaitingRange {
 private:
@@ -20,40 +21,60 @@ private:
 	typedef gaspi_number_t number_t;
 	typedef gaspi_notification_t notification_t;
 	
-public:
+
 	segment_id_t _segment;
-	notification_id_t _firstId;
-	number_t _numIds;
-	notification_t *_notifiedValues;
+	
+	notification_id_t _firstID;
+	
+	number_t _numIDs;
+	
+	notification_t *_valueBuffer;
+	
 	number_t _remaining;
+	
 	void *_eventCounter;
 	
-	WaitingRange(segment_id_t segment, notification_id_t firstId, number_t numIds, notification_t *notifiedValues, void *eventCounter) :
+public:
+	inline WaitingRange(segment_id_t segment,
+			notification_id_t firstNotificationID,
+			number_t numNotifications,
+			notification_t *valueBuffer,
+			void *eventCounter) :
 		_segment(segment),
-		_firstId(firstId),
-		_numIds(numIds),
-		_notifiedValues(notifiedValues),
-		_remaining(numIds),
+		_firstID(firstNotificationID),
+		_numIDs(numNotifications),
+		_valueBuffer(valueBuffer),
+		_remaining(numNotifications),
 		_eventCounter(eventCounter)
 	{}
 	
-	bool checkNotifications()
+	inline ~WaitingRange()
+	{
+		assert(_remaining == 0);
+	}
+	
+	inline void *getEventCounter() const
+	{
+		return _eventCounter;
+	}
+	
+	inline bool checkNotifications()
 	{
 		gaspi_return_t eret;
-		gaspi_notification_id_t notifiedId;
+		gaspi_notification_id_t notifiedID;
 		gaspi_notification_t notifiedValue;
 		
-		eret = gaspi_notify_waitsome(_segment, _firstId, _numIds, &notifiedId, GASPI_TEST);
+		eret = gaspi_notify_waitsome(_segment, _firstID, _numIDs, &notifiedID, GASPI_TEST);
 		assert(eret == GASPI_SUCCESS || eret == GASPI_TIMEOUT);
 		
 		bool completed = false;
 		if (eret == GASPI_SUCCESS) {
-			eret = gaspi_notify_reset(_segment, notifiedId, &notifiedValue);
+			eret = gaspi_notify_reset(_segment, notifiedID, &notifiedValue);
 			assert(eret == GASPI_SUCCESS);
 			
 			if (notifiedValue != 0) {
-				if (_notifiedValues != GASPI_NOTIFICATION_IGNORE) {
-					_notifiedValues[notifiedId - _firstId] = notifiedValue;
+				if (_valueBuffer != GASPI_NOTIFICATION_IGNORE) {
+					_valueBuffer[notifiedID - _firstID] = notifiedValue;
 				}
 				
 				completed = (--_remaining == 0);

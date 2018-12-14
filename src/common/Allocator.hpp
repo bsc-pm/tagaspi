@@ -25,7 +25,7 @@ private:
 	static queue_t *_queue;
 	
 public:
-	static void initialize()
+	static inline void initialize()
 	{
 		assert(!initialized());
 		
@@ -41,7 +41,7 @@ public:
 		}
 	}
 
-	static void finalize()
+	static inline void finalize()
 	{
 		assert(initialized());
 		
@@ -50,13 +50,13 @@ public:
 		std::free(_objects);
 	}
 	
-	static bool initialized()
+	static inline bool initialized()
 	{
 		return (_objects != nullptr && _queue != nullptr);
 	}
 	
 	template<typename... Args>
-	static T *allocate(Args &&... args)
+	static inline T *allocate(Args &&... args)
 	{
 		assert(initialized());
 		T *object = nullptr;
@@ -72,7 +72,7 @@ public:
 		return object;
 	}
 	
-	static void free(T *object)
+	static inline void free(T *object)
 	{
 		assert(initialized());
 		assert(object != nullptr);

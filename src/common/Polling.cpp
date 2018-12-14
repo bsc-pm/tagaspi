@@ -22,18 +22,18 @@
 
 void Polling::initialize()
 {
-	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QUEUES_PER_SERVICE) {
-		nanos6_register_polling_service("TAGASPI QUEUES", Polling::pollQueues, (void*)(uintptr_t)q);
+	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPS) {
+		nanos6_register_polling_service("TAGASPI QUEUES", pollQueues, (void*)(uintptr_t)q);
 	}
-	nanos6_register_polling_service("TAGASPI NOTIFICATIONS", Polling::pollNotifications, nullptr);
+	nanos6_register_polling_service("TAGASPI NOTIFICATIONS", pollNotifications, nullptr);
 }
 
 void Polling::finalize()
 {
-	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QUEUES_PER_SERVICE) {
-		nanos6_unregister_polling_service("TAGASPI QUEUES", Polling::pollQueues, (void*)(uintptr_t)q);
+	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPS) {
+		nanos6_unregister_polling_service("TAGASPI QUEUES", pollQueues, (void*)(uintptr_t)q);
 	}
-	nanos6_unregister_polling_service("TAGASPI NOTIFICATIONS", Polling::pollNotifications, nullptr);
+	nanos6_unregister_polling_service("TAGASPI NOTIFICATIONS", pollNotifications, nullptr);
 }
 
 int Polling::pollQueues(void *data)
@@ -42,14 +42,14 @@ int Polling::pollQueues(void *data)
 	assert(queue < _env.maxQueues);
 	
 	gaspi_number_t completedReqs, numQueues, r;
-	gaspi_request_t requests[NUM_REQUESTS];
+	gaspi_request_t requests[NREQ];
 	gaspi_status_t status;
 	void *eventCounter;
 	
 	gaspi_return_t eret;
-	UNUSED(eret);
+	UNUSED_VARIABLE(eret);
 	
-	numQueues = std::min(queue + QUEUES_PER_SERVICE, _env.maxQueues);
+	numQueues = std::min(queue + QPPS, _env.maxQueues);
 	
 	for (; queue < numQueues; ++queue) {
 		SpinLock &mutex = _env.queuePollingLocks[queue];
@@ -58,9 +58,9 @@ int Polling::pollQueues(void *data)
 		}
 		
 		do {
-			eret = gaspi_request_wait(queue, NUM_REQUESTS, &completedReqs, requests, GASPI_TEST);
+			eret = gaspi_request_wait(queue, NREQ, &completedReqs, requests, GASPI_TEST);
 			assert(eret == GASPI_SUCCESS || eret == GASPI_TIMEOUT);
-			assert(completedReqs <= NUM_REQUESTS);
+			assert(completedReqs <= NREQ);
 			
 			for (r = 0; r < completedReqs; ++r) {
 				eret = gaspi_request_get_tag(&requests[r], (gaspi_tag_t *) &eventCounter);
@@ -73,18 +73,15 @@ int Polling::pollQueues(void *data)
 				
 				nanos6_decrease_task_event_counter(eventCounter, 1);
 			}
-		} while (completedReqs == NUM_REQUESTS);
+		} while (completedReqs == NREQ);
 		
 		mutex.unlock();
 	}
 	return 0;
 }
 
-int Polling::pollNotifications(void *data)
+int Polling::pollNotifications(void *)
 {
-	assert(data == NULL);
-	UNUSED(data);
-	
 	SpinLock &mutex = _env.notificationPollingLock;
 	if (!mutex.trylock()) {
 		return 0;
@@ -107,7 +104,11 @@ int Polling::pollNotifications(void *data)
 			
 			for (WaitingRange *range : completeRanges) {
 				assert(range != nullptr);
-				nanos6_decrease_task_event_counter(range->_eventCounter, range->_numIds);
+				
+				void *eventCounter = range->getEventCounter();
+				assert(eventCounter != nullptr);
+				
+				nanos6_decrease_task_event_counter(eventCounter, 1);
 				Allocator<WaitingRange>::free(range);
 			}
 			completeRanges.clear();

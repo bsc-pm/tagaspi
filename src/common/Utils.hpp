@@ -11,9 +11,9 @@
 #include <xmmintrin.h>
 
 #ifdef NDEBUG
-#define UNUSED(_var) (void)(_var)
+#define UNUSED_VARIABLE(_var) (void)(_var)
 #else
-#define UNUSED(_var)
+#define UNUSED_VARIABLE(_var)
 #endif
 
 #define delay() _mm_pause()

@@ -7,7 +7,7 @@
 #ifndef WAITING_RANGE_QUEUE_HPP
 #define WAITING_RANGE_QUEUE_HPP
 
-#include "MPSCQueue.hpp"
+#include "MPSCLockFreeQueue.hpp"
 #include "Utils.hpp"
 #include "WaitingRange.hpp"
 
@@ -18,21 +18,21 @@
 
 class WaitingRangeQueue {
 private:
-	MPSCQueue<WaitingRange*> _queue;
+	MPSCLockFreeQueue<WaitingRange*> _queue;
 	
 public:
-	WaitingRangeQueue(int capacity = WR_QUEUE_CAPACITY) :
+	inline WaitingRangeQueue(int capacity = WR_QUEUE_CAPACITY) :
 		_queue(capacity)
 	{
 		assert(capacity > 0);
 	}
 	
-	~WaitingRangeQueue()
+	inline ~WaitingRangeQueue()
 	{
 		assert(_queue.empty());
 	}
 	
-	void enqueue(WaitingRange *waitingRange)
+	inline void enqueue(WaitingRange *waitingRange)
 	{
 		assert(waitingRange != nullptr);
 		while (!_queue.enqueue(waitingRange)) {
@@ -40,7 +40,7 @@ public:
 		}
 	}
 	
-	bool dequeueSome(std::list<WaitingRange*> &pendingRanges, std::list<WaitingRange*> &completeRanges, int maximum)
+	inline bool dequeueSome(std::list<WaitingRange*> &pendingRanges, std::list<WaitingRange*> &completeRanges, int maximum)
 	{
 		assert(maximum > 0);
 		

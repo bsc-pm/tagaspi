@@ -32,7 +32,7 @@ private:
 	void *_data;
 	
 public:
-	QueueGroup(queue_id_t first, number_t num, policy_t policy) :
+	inline QueueGroup(queue_id_t first, number_t num, policy_t policy) :
 		_firstQueue(first),
 		_numQueues(num),
 		_policy(policy),
@@ -42,13 +42,13 @@ public:
 		setupData();
 	}
 	
-	~QueueGroup()
+	inline ~QueueGroup()
 	{
 		assert(_data != nullptr);
 		removeData();
 	}
 	
-	queue_id_t getQueue()
+	inline queue_id_t getQueue()
 	{
 		if (_policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT) {
 			queue_id_t queue = _firstQueue;
@@ -73,7 +73,7 @@ public:
 	}
 	
 private:
-	void setupData()
+	inline void setupData()
 	{
 		if (_policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT) {
 			_data = new std::atomic<number_t>(0);
@@ -103,7 +103,7 @@ private:
 		}
 	}
 	
-	void removeData()
+	inline void removeData()
 	{
 		if (_policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT) {
 			std::atomic<number_t> *counter = (std::atomic<number_t> *)_data;
@@ -119,12 +119,10 @@ private:
 	struct queue_range_t {
 		queue_id_t first;
 		number_t num;
-		
-		queue_range_t() : first(0), num(0)
-		{}
+		inline queue_range_t() : first(0), num(0) {}
 	};
 	
-	void setupCPURoundRobinData(size_t numCPUs, size_t numNUMAs, const size_t *numaIDs, mask_t numaMask)
+	inline void setupCPURoundRobinData(size_t numCPUs, size_t numNUMAs, const size_t *numaIDs, mask_t numaMask)
 	{
 		const size_t queuesPerNUMA = _numQueues / numNUMAs;
 		const size_t remainingQueues = _numQueues % numNUMAs;

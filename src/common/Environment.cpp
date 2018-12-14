@@ -16,10 +16,6 @@
 
 #include <cassert>
 
-#ifndef MAX_QUEUE_GROUPS
-#define MAX_QUEUE_GROUPS 16
-#endif
-
 Environment _env;
 
 void Environment::initialize()

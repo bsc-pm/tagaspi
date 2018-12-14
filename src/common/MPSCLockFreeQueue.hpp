@@ -1,7 +1,7 @@
 /* 2015 Daniel Bittman <danielbittman1@gmail.com>: http://dbittman.github.io/ */
 
-#ifndef MPSC_QUEUE_HPP
-#define MPSC_QUEUE_HPP
+#ifndef MPSC_LOCKFREE_QUEUE_HPP
+#define MPSC_LOCKFREE_QUEUE_HPP
 
 #include "Utils.hpp"
 
@@ -14,7 +14,7 @@
 
 
 template <typename T>
-class alignas(64) MPSCQueue {
+class alignas(64) MPSCLockFreeQueue {
 private:
 	std::atomic<size_t> _count;
 	
@@ -27,7 +27,7 @@ private:
 	std::atomic<T> *_buffer;
 	
 public:
-	MPSCQueue(size_t capacity) :
+	inline MPSCLockFreeQueue(size_t capacity) :
 		_count(0),
 		_head(0),
 		_tail(0),
@@ -44,13 +44,14 @@ public:
 		std::atomic_thread_fence(std::memory_order_seq_cst);
 	}
 	
-	~MPSCQueue()
+	inline ~MPSCLockFreeQueue()
 	{
 		assert(!_count.load());
+		assert(_buffer != nullptr);
 		delete [] _buffer;
 	}
 	
-	bool enqueue(T obj)
+	inline bool enqueue(T obj)
 	{
 		size_t count = std::atomic_fetch_add_explicit(&_count, (size_t)1, std::memory_order_seq_cst);
 		if (count >= _capacity) {
@@ -64,13 +65,13 @@ public:
 		assert(_buffer[head % _capacity].load() == 0);
 		
 		T rv = std::atomic_exchange_explicit(&_buffer[head % _capacity], obj, std::memory_order_seq_cst);
+		UNUSED_VARIABLE(rv);
 		assert(rv == 0);
-		UNUSED(rv);
 		
 		return true;
 	}
 	
-	T dequeue()
+	inline T dequeue()
 	{
 		T ret = std::atomic_exchange_explicit(&_buffer[_tail], (T) 0, std::memory_order_seq_cst);
 		if (!ret) {
@@ -88,26 +89,26 @@ public:
 		}
 		
 		size_t r = std::atomic_fetch_sub_explicit(&_count, (size_t)1, std::memory_order_seq_cst);
+		UNUSED_VARIABLE(r);
 		assert(r > 0);
-		UNUSED(r);
 		
 		return ret;
 	}
 	
-	size_t size() const
+	inline size_t size() const
 	{
 		return std::atomic_load_explicit(&_count, std::memory_order_seq_cst);
 	}
 	
-	bool empty() const
+	inline bool empty() const
 	{
 		return size() == 0;
 	}
 	
-	size_t capacity() const
+	inline size_t capacity() const
 	{
 		return _capacity;
 	}
 };
 
-#endif /* MPSC_QUEUE_HPP */
+#endif /* MPSC_LOCKFREE_QUEUE_HPP */
