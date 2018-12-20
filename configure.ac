@@ -35,6 +35,9 @@ AX_CHECK_GASPI
 # Check for Boost
 AX_BOOST_BASE([1.59], [], [ AC_MSG_ERROR([Boost library not found])])
 
+# Enable CPU info API
+AX_RUNTIME_CPU_INFO
+
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_SIZE_T
 

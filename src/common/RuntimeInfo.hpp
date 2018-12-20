@@ -6,6 +6,7 @@
 
 class RuntimeInfo {
 public:
+#if HAVE_RUNTIME_CPU_INFO
 	static inline void getSystemUsageInfo(size_t *numCPUs, size_t *numaIDs)
 	{
 		assert(numCPUs != nullptr);
@@ -23,7 +24,9 @@ public:
 		}
 		assert(*numCPUs == cpu);
 	}
+#endif
 };
+
 
 #endif // RUNTIME_INFO_HPP
 

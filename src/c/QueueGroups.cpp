@@ -42,9 +42,16 @@ tagaspi_queue_group_create(const gaspi_queue_group_id_t queue_group_id,
 		fprintf(stderr, "Error: Queue group %d already exists\n", queue_group_id);
 		return GASPI_ERROR;
 	}
+
+	if (!QueueGroup::isValidPolicy(policy)) {
+		fprintf(stderr, "Error: Queue group policy is not valid\n");
+		return GASPI_ERROR;
+	}
 	
-	QueueGroup *queueGroup = new QueueGroup(queue_begin, queue_num, policy);
+	QueueGroup *queueGroup = new QueueGroup(queue_begin, queue_num);
 	assert(queueGroup != nullptr);
+	
+	queueGroup->setupPolicy(policy);
 	
 	_env.queueGroups[queue_group_id] = queueGroup;
 	_env.numQueueGroups += 1;

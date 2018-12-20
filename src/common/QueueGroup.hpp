@@ -10,6 +10,8 @@
 #include <GASPI.h>
 #include <TAGASPI.h>
 
+#include <config.h>
+
 #include "RuntimeAPI.hpp"
 #include "RuntimeInfo.hpp"
 #include "Utils.hpp"
@@ -32,26 +34,25 @@ private:
 	void *_data;
 	
 public:
-	inline QueueGroup(queue_id_t first, number_t num, policy_t policy) :
+	inline QueueGroup(queue_id_t first, number_t num) :
 		_firstQueue(first),
 		_numQueues(num),
-		_policy(policy),
 		_data(nullptr)
 	{
 		assert(num > 0);
-		setupData();
 	}
 	
 	inline ~QueueGroup()
 	{
-		assert(_data != nullptr);
-		removeData();
+		if (_data != nullptr) {
+			cleanupPolicyData();
+		}
 	}
 	
 	inline queue_id_t getQueue()
 	{
+		queue_id_t queue = _firstQueue;
 		if (_policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT) {
-			queue_id_t queue = _firstQueue;
 			if (_numQueues > 1) {
 				assert(_data != nullptr);
 				std::atomic<number_t> &counter = *((std::atomic<number_t> *)_data);
@@ -63,22 +64,29 @@ public:
 				/* In case the operation fails, another thread will update it */
 				counter.compare_exchange_strong(offset, nextOffset);
 			}
-			return queue;
-		} else {
+		}
+#if HAVE_RUNTIME_CPU_INFO
+		else {
 			size_t cpu = nanos6_get_current_virtual_cpu();
 			gaspi_queue_id_t *queues = (gaspi_queue_id_t *)_data;
 			assert(queues != nullptr);
-			return queues[cpu];
+			queue = queues[cpu];
 		}
+#endif
+		return queue;
 	}
 	
-private:
-	inline void setupData()
+	inline void setupPolicy(policy_t policy)
 	{
+		assert(QueueGroup::isValidPolicy(policy));
+		_policy = policy;
+		
 		if (_policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT) {
 			_data = new std::atomic<number_t>(0);
 			assert(_data != nullptr);
-		} else {
+		}
+#if HAVE_RUNTIME_CPU_INFO
+		else {
 			size_t numCPUs, numNUMAs;
 			size_t numaIDs[get_nprocs_conf()];
 			mask_t numaMask;
@@ -101,21 +109,20 @@ private:
 			
 			setupCPURoundRobinData(numCPUs, numNUMAs, numaIDs, numaMask);
 		}
+#endif
 	}
 	
-	inline void removeData()
+	static inline bool isValidPolicy(policy_t policy)
 	{
-		if (_policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT) {
-			std::atomic<number_t> *counter = (std::atomic<number_t> *)_data;
-			assert(counter != nullptr);
-			delete counter;
-		} else {
-			queue_id_t *queueIDs = (queue_id_t *)_data;
-			assert(queueIDs != nullptr);
-			delete [] queueIDs;
-		}
+#if HAVE_RUNTIME_CPU_INFO
+		return (policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT
+             || policy == GASPI_QUEUE_GROUP_POLICY_CPU_RR);
+#else
+		return (policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT);
+#endif
 	}
 	
+private:
 	struct queue_range_t {
 		queue_id_t first;
 		number_t num;
@@ -180,6 +187,24 @@ private:
 				}
 			}
 		}
+	}
+	
+	inline void cleanupPolicyData()
+	{
+		assert(_data != nullptr);
+		
+		if (_policy == GASPI_QUEUE_GROUP_POLICY_DEFAULT) {
+			std::atomic<number_t> *counter = (std::atomic<number_t> *)_data;
+			assert(counter != nullptr);
+			delete counter;
+		}
+#if HAVE_RUNTIME_CPU_INFO
+		else {
+			queue_id_t *queueIDs = (queue_id_t *)_data;
+			assert(queueIDs != nullptr);
+			delete [] queueIDs;
+		}
+#endif
 	}
 };
 
