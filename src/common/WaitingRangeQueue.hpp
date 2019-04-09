@@ -7,9 +7,9 @@
 #ifndef WAITING_RANGE_QUEUE_HPP
 #define WAITING_RANGE_QUEUE_HPP
 
-#include "MPSCLockFreeQueue.hpp"
-#include "Utils.hpp"
 #include "WaitingRange.hpp"
+#include "util/MPSCLockFreeQueue.hpp"
+#include "util/Utils.hpp"
 
 #ifndef WR_QUEUE_CAPACITY
 #define WR_QUEUE_CAPACITY (64*1024)
@@ -18,7 +18,7 @@
 
 class WaitingRangeQueue {
 private:
-	MPSCLockFreeQueue<WaitingRange*> _queue;
+	util::MPSCLockFreeQueue<WaitingRange*> _queue;
 	
 public:
 	inline WaitingRangeQueue(int capacity = WR_QUEUE_CAPACITY) :
@@ -36,7 +36,7 @@ public:
 	{
 		assert(waitingRange != nullptr);
 		while (!_queue.enqueue(waitingRange)) {
-			delay();
+			util::spinWait();
 		}
 	}
 	
@@ -66,4 +66,4 @@ public:
 	}
 };
 
-#endif /* WAITING_RANGE_QUEUE_HPP */
+#endif // WAITING_RANGE_QUEUE_HPP

@@ -41,6 +41,8 @@ AX_RUNTIME_CPU_INFO
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_SIZE_T
 
+AX_CHECK_CPUS
+
 # Turn off shared libraries.
 LT_INIT([static])
 

@@ -12,10 +12,13 @@
 #include "WaitingRangeList.hpp"
 #include "WaitingRangeQueue.hpp"
 #include "QueueGroup.hpp"
-#include "SpinLock.hpp"
+#include "util/SpinLock.hpp"
 
 
 class Environment {
+private:
+	typedef util::SpinLock<> SpinLock;
+	
 public:
 	static const int MAX_QUEUE_GROUPS = 16;
 	
@@ -52,4 +55,4 @@ public:
 
 extern Environment _env;
 
-#endif /* ENVIRONMENT_HPP */
+#endif // ENVIRONMENT_HPP

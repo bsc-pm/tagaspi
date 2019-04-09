@@ -10,11 +10,13 @@
 #include "common/Environment.hpp"
 #include "common/QueueGroup.hpp"
 #include "common/RuntimeAPI.hpp"
-#include "common/SpinLock.hpp"
+#include "common/util/SpinLock.hpp"
 
 #include <cassert>
 #include <cstdio>
 #include <mutex>
+
+typedef util::SpinLock<> SpinLock;
 
 #ifdef __cplusplus
 extern "C" {

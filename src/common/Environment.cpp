@@ -11,7 +11,6 @@
 #include "Allocator.hpp"
 #include "Environment.hpp"
 #include "Polling.hpp"
-#include "SpinLock.hpp"
 #include "WaitingRange.hpp"
 
 #include <cassert>

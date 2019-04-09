@@ -1,11 +1,16 @@
+/*
+	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
+	
+	Copyright (C) 2015-2018 Barcelona Supercomputing Center (BSC)
+*/
+
 #ifndef RUNTIME_INFO_HPP
 #define RUNTIME_INFO_HPP
 
-#include "RuntimeAPI.hpp"
+#include "common/RuntimeAPI.hpp"
 
 
-class RuntimeInfo {
-public:
+namespace util {
 #if HAVE_RUNTIME_CPU_INFO
 	static inline void getSystemUsageInfo(size_t *numCPUs, size_t *numaIDs)
 	{
@@ -29,4 +34,3 @@ public:
 
 
 #endif // RUNTIME_INFO_HPP
-

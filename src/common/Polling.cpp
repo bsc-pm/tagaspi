@@ -10,11 +10,10 @@
 #include "Allocator.hpp"
 #include "Environment.hpp"
 #include "Polling.hpp"
-#include "SpinLock.hpp"
-#include "Utils.hpp"
 #include "WaitingRange.hpp"
 #include "WaitingRangeList.hpp"
 #include "WaitingRangeQueue.hpp"
+#include "util/Utils.hpp"
 
 #include <algorithm>
 #include <cassert>

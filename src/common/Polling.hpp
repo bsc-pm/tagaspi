@@ -10,12 +10,15 @@
 #include <GASPI.h>
 
 #include "RuntimeAPI.hpp"
+#include "util/SpinLock.hpp"
 
 #include <cstdint>
 
 
 class Polling {
 private:
+	typedef util::SpinLock<> SpinLock;
+	
 	/* Number of requests checked per gaspi_request_wait call */
 	static const unsigned int NREQ = 16;
 	

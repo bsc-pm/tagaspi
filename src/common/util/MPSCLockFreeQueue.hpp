@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <sys/types.h>
 
+namespace util {
 
 template <typename T>
 class alignas(64) MPSCLockFreeQueue {
@@ -111,4 +112,6 @@ public:
 	}
 };
 
-#endif /* MPSC_LOCKFREE_QUEUE_HPP */
+} // namespace util
+
+#endif // MPSC_LOCKFREE_QUEUE_HPP

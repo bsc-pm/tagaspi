@@ -55,4 +55,4 @@ public:
 	}
 };
 
-#endif /* WAITING_RANGE_LIST_HPP */
+#endif // WAITING_RANGE_LIST_HPP

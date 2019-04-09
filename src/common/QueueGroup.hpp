@@ -13,8 +13,8 @@
 #include <config.h>
 
 #include "RuntimeAPI.hpp"
-#include "RuntimeInfo.hpp"
-#include "Utils.hpp"
+#include "util/RuntimeInfo.hpp"
+#include "util/Utils.hpp"
 
 #include <atomic>
 #include <cassert>
@@ -89,10 +89,10 @@ public:
 		else {
 			size_t numCPUs, numNUMAs;
 			size_t numaIDs[get_nprocs_conf()];
-			mask_t numaMask;
+			util::mask_t numaMask;
 			
 			/* Get system information from the runtime system */
-			RuntimeInfo::getSystemUsageInfo(&numCPUs, numaIDs);
+			util::getSystemUsageInfo(&numCPUs, numaIDs);
 			
 			_data = new queue_id_t[numCPUs];
 			assert(_data != nullptr);
@@ -129,7 +129,7 @@ private:
 		inline queue_range_t() : first(0), num(0) {}
 	};
 	
-	inline void setupCPURoundRobinData(size_t numCPUs, size_t numNUMAs, const size_t *numaIDs, mask_t numaMask)
+	inline void setupCPURoundRobinData(size_t numCPUs, size_t numNUMAs, const size_t *numaIDs, util::mask_t numaMask)
 	{
 		const size_t queuesPerNUMA = _numQueues / numNUMAs;
 		const size_t remainingQueues = _numQueues % numNUMAs;
