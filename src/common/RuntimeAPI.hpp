@@ -1,3 +1,9 @@
+/*
+	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
+	
+	Copyright (C) 2015-2019 Barcelona Supercomputing Center (BSC)
+*/
+
 #ifndef RUNTIME_API_HPP
 #define RUNTIME_API_HPP
 
@@ -19,14 +25,6 @@ extern "C" {
 	
 	/* Additional API routines */
 	int nanos6_in_serial_context();
-	
-	/* System info API */
-	unsigned int nanos6_get_num_cpus();
-	unsigned int nanos6_get_current_virtual_cpu();
-	void *nanos6_cpus_begin();
-	void *nanos6_cpus_end();
-	void *nanos6_cpus_advance(void *cpuIterator);
-	long nanos6_cpus_get_numa(void *cpuIterator);
 }
 
 #endif // RUNTIME_API_HPP

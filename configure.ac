@@ -17,6 +17,7 @@ AX_DEBUG_MODE
 
 # Look for a valid C++ compiler
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11([], [mandatory])
 
 # AM_PROG_AR must be called before LT_INIT or a warning ensues
 AM_PROG_AR
@@ -29,14 +30,14 @@ AM_SILENT_RULES([yes])
 AC_CHECK_HEADERS([unistd.h])
 AC_CHECK_HEADERS([xmmintrin.h])
 
+# Check libraries
+AC_CHECK_LIBNUMA
+
 # Check for GASPI
 AX_CHECK_GASPI
 
 # Check for Boost
 AX_BOOST_BASE([1.59], [], [ AC_MSG_ERROR([Boost library not found])])
-
-# Enable CPU info API
-AX_RUNTIME_CPU_INFO
 
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_SIZE_T
