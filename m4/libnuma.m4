@@ -1,6 +1,6 @@
 #	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 #	
-#	Copyright (C) 2015-2018 Barcelona Supercomputing Center (BSC)
+#	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
 
 
 AC_DEFUN([AC_CHECK_LIBNUMA],
