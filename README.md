@@ -24,7 +24,7 @@ The Task-Aware MPI library requires the installation of the following tools and 
 * Automake, autoconf, libtool, make and a C and C++ compiler.
 * GPI-2 extended with the low-level operations API.
 * [Boost](http://boost.org) library version 1.59 or greater.
-* [OmpSs-2](https://github.com/bsc-pm/ompss-2-releases) (version 2019.06b or greater). Required
+* [OmpSs-2](https://github.com/bsc-pm/ompss-2-releases) (version 2018.11 or greater). Required
   when compiling the hybrid applications.
 
 ## Building and Installing

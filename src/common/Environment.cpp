@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 	
-	Copyright (C) 2015-2018 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2015-2019 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -10,16 +10,22 @@
 
 #include "Allocator.hpp"
 #include "Environment.hpp"
+#include "HardwareInfo.hpp"
 #include "Polling.hpp"
 #include "WaitingRange.hpp"
 
 #include <cassert>
 
 Environment _env;
+std::vector<int> HardwareInfo::_cpuToNUMANode;
+std::vector<bool> HardwareInfo::_numaNodeAvailability;
+size_t HardwareInfo::_numAvailableNUMANodes;
 
 void Environment::initialize()
 {
 	assert(!_env.enabled);
+	
+	HardwareInfo::initialize();
 	
 	gaspi_queue_max(&_env.maxQueues);
 	gaspi_segment_max(&_env.maxSegments);
@@ -67,5 +73,7 @@ void Environment::finalize()
 	
 	_env.enabled = false;
 	std::atomic_thread_fence(std::memory_order_seq_cst);
+	
+	HardwareInfo::finalize();
 }
 
