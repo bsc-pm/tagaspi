@@ -6,8 +6,6 @@
 
 #include <GASPI.h>
 
-#include "RuntimeAPI.hpp"
-
 #include "Allocator.hpp"
 #include "Environment.hpp"
 #include "HardwareInfo.hpp"

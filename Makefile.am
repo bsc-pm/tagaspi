@@ -39,10 +39,27 @@ c_api_sources=               \
 
 fortran_api_sources=
 
-common_sources=             \
- src/common/Allocator.cpp   \
- src/common/Environment.cpp \
- src/common/Polling.cpp
+common_sources=              \
+ src/common/Allocator.cpp    \
+ src/common/Environment.cpp  \
+ src/common/Polling.cpp      \
+ src/common/TaskingModel.cpp
+
+noinst_HEADERS =                       \
+ src/common/Allocator.hpp              \
+ src/common/Environment.hpp            \
+ src/common/HardwareInfo.hpp           \
+ src/common/Polling.hpp                \
+ src/common/QueueGroup.hpp             \
+ src/common/TaskingModelAPI.hpp        \
+ src/common/TaskingModel.hpp           \
+ src/common/WaitingRange.hpp           \
+ src/common/WaitingRangeList.hpp       \
+ src/common/WaitingRangeQueue.hpp      \
+ src/common/util/MPSCLockFreeQueue.hpp \
+ src/common/util/SpinLock.hpp          \
+ src/common/util/SymbolResolver.hpp    \
+ src/common/util/Utils.hpp
 
 lib_LTLIBRARIES=libtagaspi.la libtagaspi-c.la
 libtagaspi_la_SOURCES=$(common_sources) $(c_api_sources) $(fortran_api_sources)

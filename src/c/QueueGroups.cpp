@@ -9,7 +9,7 @@
 
 #include "common/Environment.hpp"
 #include "common/QueueGroup.hpp"
-#include "common/RuntimeAPI.hpp"
+#include "common/TaskingModel.hpp"
 #include "common/util/SpinLock.hpp"
 
 #include <cassert>

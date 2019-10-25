@@ -9,7 +9,6 @@
 
 #include <GASPI.h>
 
-#include "RuntimeAPI.hpp"
 #include "util/SpinLock.hpp"
 
 #include <cstdint>

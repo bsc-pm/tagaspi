@@ -10,6 +10,7 @@
 #include "Allocator.hpp"
 #include "Environment.hpp"
 #include "Polling.hpp"
+#include "TaskingModel.hpp"
 #include "WaitingRange.hpp"
 #include "WaitingRangeList.hpp"
 #include "WaitingRangeQueue.hpp"
@@ -22,17 +23,17 @@
 void Polling::initialize()
 {
 	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPS) {
-		nanos6_register_polling_service("TAGASPI QUEUES", pollQueues, (void*)(uintptr_t)q);
+		TaskingModel::registerPollingService("TAGASPI QUEUES", pollQueues, (void*)(uintptr_t)q);
 	}
-	nanos6_register_polling_service("TAGASPI NOTIFICATIONS", pollNotifications, nullptr);
+	TaskingModel::registerPollingService("TAGASPI NOTIFICATIONS", pollNotifications, nullptr);
 }
 
 void Polling::finalize()
 {
 	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPS) {
-		nanos6_unregister_polling_service("TAGASPI QUEUES", pollQueues, (void*)(uintptr_t)q);
+		TaskingModel::unregisterPollingService("TAGASPI QUEUES", pollQueues, (void*)(uintptr_t)q);
 	}
-	nanos6_unregister_polling_service("TAGASPI NOTIFICATIONS", pollNotifications, nullptr);
+	TaskingModel::unregisterPollingService("TAGASPI NOTIFICATIONS", pollNotifications, nullptr);
 }
 
 int Polling::pollQueues(void *data)
@@ -70,7 +71,7 @@ int Polling::pollQueues(void *data)
 				assert(eret == GASPI_SUCCESS);
 				assert(status == GASPI_SUCCESS);
 				
-				nanos6_decrease_task_event_counter(eventCounter, 1);
+				TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
 			}
 		} while (completedReqs == NREQ);
 		
@@ -107,7 +108,7 @@ int Polling::pollNotifications(void *)
 				void *eventCounter = range->getEventCounter();
 				assert(eventCounter != nullptr);
 				
-				nanos6_decrease_task_event_counter(eventCounter, 1);
+				TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
 				Allocator<WaitingRange>::free(range);
 			}
 			completeRanges.clear();

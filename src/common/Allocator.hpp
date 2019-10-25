@@ -7,7 +7,9 @@
 #ifndef ALLOCATOR_HPP
 #define ALLOCATOR_HPP
 
-#include <config.h>
+#include <cassert>
+
+#include "util/Utils.hpp"
 
 #include <boost/lockfree/queue.hpp>
 
@@ -16,10 +18,8 @@ class Allocator {
 private:
 	static const int NUM_ENTRIES = (64*1000);
 	
-public:
 	typedef boost::lockfree::queue<T*, boost::lockfree::capacity<NUM_ENTRIES> > queue_t;
 	
-private:
 	static T *_objects;
 	
 	static queue_t *_queue;
@@ -62,9 +62,7 @@ public:
 		T *object = nullptr;
 		
 		while (!_queue->pop(object)) {
-#ifdef X86_64_ARCH
-			__asm__("pause" ::: "memory");
-#endif
+			util::spinWait();
 		}
 		assert(object != nullptr);
 		

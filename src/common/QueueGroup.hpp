@@ -13,7 +13,6 @@
 #include <config.h>
 
 #include "HardwareInfo.hpp"
-#include "RuntimeAPI.hpp"
 #include "util/Utils.hpp"
 
 #include <atomic>
@@ -96,10 +95,9 @@ public:
 	}
 	
 private:
-	struct queue_range_t {
+	struct QueueRange {
 		queue_id_t first;
 		number_t num;
-		inline queue_range_t() : first(0), num(0) {}
 	};
 	
 	inline void setupCPURoundRobinData(queue_id_t *assignationQueue)
@@ -116,7 +114,7 @@ private:
 		const size_t queuesPerNUMA = _numQueues / numNUMAs;
 		const size_t remainingQueues = _numQueues % numNUMAs;
 		
-		queue_range_t numaQueues[maxNUMAs];
+		QueueRange numaQueues[maxNUMAs];
 		
 		/* Assigns distinct ranges of queues to NUMA nodes if possible */
 		if (_numQueues >= numNUMAs) {
