@@ -17,6 +17,7 @@ AM_CXXFLAGS=-O0 -g3 -std=c++11 -Wall -Wextra $(CXXFLAGS)
 else
 AM_CXXFLAGS=-O3 -std=c++11 -fno-exceptions -Wall -Wextra $(CXXFLAGS)
 endif
+AM_CXXFLAGS += $(FALIGNED_NEW_FLAG)
 
 AM_LDFLAGS=$(BOOST_LDFLAGS) -ldl $(LDFLAGS)
 LIBS=

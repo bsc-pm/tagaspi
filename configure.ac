@@ -42,6 +42,8 @@ AX_BOOST_BASE([1.59], [], [ AC_MSG_ERROR([Boost library not found])])
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_SIZE_T
 
+AC_CHECK_EXTRACT_FIRST_COMPILER_FLAG([FALIGNED_NEW_FLAG], [-faligned-new])
+
 AX_CHECK_CPUS
 
 # Turn off shared libraries.
