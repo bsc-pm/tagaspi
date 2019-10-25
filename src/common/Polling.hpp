@@ -19,7 +19,7 @@ private:
 	typedef util::SpinLock<> SpinLock;
 	
 	/* Number of requests checked per gaspi_request_wait call */
-	static const unsigned int NREQ = 16;
+	static const unsigned int NREQ = 64;
 	
 	/* Number of queues per polling service */
 	static const unsigned int QPPS = 4;
