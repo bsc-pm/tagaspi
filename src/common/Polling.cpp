@@ -42,34 +42,41 @@ int Polling::pollQueues(void *data)
 	assert(queue < _env.maxQueues);
 	
 	gaspi_number_t completedReqs, numQueues, r;
-	gaspi_request_t requests[NREQ];
-	gaspi_status_t status;
-	void *eventCounter;
-	
+	gaspi_status_t statuses[NREQ];
+	gaspi_tag_t tags[NREQ];
 	gaspi_return_t eret;
-	UNUSED_VARIABLE(eret);
 	
 	numQueues = std::min(queue + QPPS, _env.maxQueues);
 	
 	for (; queue < numQueues; ++queue) {
 		SpinLock &mutex = _env.queuePollingLocks[queue];
 		if (!mutex.trylock()) {
+			// This should not happen since polling services
+			// are called from a single thread at a time
 			continue;
 		}
 		
 		do {
-			eret = gaspi_request_wait(queue, NREQ, &completedReqs, requests, GASPI_TEST);
-			assert(eret == GASPI_SUCCESS || eret == GASPI_TIMEOUT);
+			eret = gaspi_request_wait(queue, NREQ, &completedReqs, tags, statuses, GASPI_TEST);
+			if (eret != GASPI_SUCCESS && eret != GASPI_TIMEOUT) {
+				// We are probably cheking queues that are not created
+				if (eret != GASPI_ERR_INV_QUEUE) {
+					fprintf(stderr, "Error: Unexpected return code from gaspi_request_wait\n");
+					abort();
+				}
+				completedReqs = 0;
+				continue;
+			}
 			assert(completedReqs <= NREQ);
 			
 			for (r = 0; r < completedReqs; ++r) {
-				eret = gaspi_request_get_tag(&requests[r], (gaspi_tag_t *) &eventCounter);
-				assert(eret == GASPI_SUCCESS);
+				void *eventCounter = (void *) tags[r];
 				assert(eventCounter != nullptr);
 				
-				eret = gaspi_request_get_status(&requests[r], &status);
-				assert(eret == GASPI_SUCCESS);
-				assert(status == GASPI_SUCCESS);
+				if (statuses[r].error != GASPI_SUCCESS) {
+					fprintf(stderr, "Error: TAGASPI operation with tag %lld failed\n", (gaspi_tag_t) eventCounter);
+					abort();
+				}
 				
 				TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
 			}
@@ -84,6 +91,8 @@ int Polling::pollNotifications(void *)
 {
 	SpinLock &mutex = _env.notificationPollingLock;
 	if (!mutex.trylock()) {
+		// This should not happen since polling services
+		// are called from a single thread at a time
 		return 0;
 	}
 	

@@ -10,6 +10,7 @@
 #include "Environment.hpp"
 #include "HardwareInfo.hpp"
 #include "Polling.hpp"
+#include "TaskingModel.hpp"
 #include "WaitingRange.hpp"
 
 #include <cassert>
@@ -24,6 +25,7 @@ void Environment::initialize()
 	assert(!_env.enabled);
 	
 	HardwareInfo::initialize();
+	TaskingModel::initialize();
 	
 	gaspi_queue_max(&_env.maxQueues);
 	gaspi_segment_max(&_env.maxSegments);

@@ -13,6 +13,7 @@
 #include "Polling.hpp"
 
 #include <cassert>
+#include <cstdio>
 
 class WaitingRange {
 private:
@@ -65,12 +66,18 @@ public:
 		gaspi_notification_t notifiedValue;
 		
 		eret = gaspi_notify_waitsome(_segment, _firstID, _numIDs, &notifiedID, GASPI_TEST);
-		assert(eret == GASPI_SUCCESS || eret == GASPI_TIMEOUT);
+		if (eret != GASPI_SUCCESS && eret != GASPI_TIMEOUT) {
+			fprintf(stderr, "Error: Unexpected return error from gaspi_notify_waitsome\n");
+			abort();
+		}
 		
 		bool completed = false;
 		if (eret == GASPI_SUCCESS) {
 			eret = gaspi_notify_reset(_segment, notifiedID, &notifiedValue);
-			assert(eret == GASPI_SUCCESS);
+			if (eret != GASPI_SUCCESS) {
+				fprintf(stderr, "Error: Unexpected return error from gaspi_notify_reset\n");
+				abort();
+			}
 			
 			if (notifiedValue != 0) {
 				if (_valueBuffer != GASPI_NOTIFICATION_IGNORE) {
