@@ -1,5 +1,12 @@
 /* 2015 Daniel Bittman <danielbittman1@gmail.com>: http://dbittman.github.io/ */
 
+/*
+	This file is part of Task-Aware MPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
+	
+	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+*/
+
+
 #ifndef MPSC_LOCKFREE_QUEUE_HPP
 #define MPSC_LOCKFREE_QUEUE_HPP
 
