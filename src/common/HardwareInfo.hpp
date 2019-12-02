@@ -28,19 +28,22 @@ public:
 		assert(_cpuToNUMANode.empty());
 		assert(_numaNodeAvailability.empty());
 		
-		const size_t maxNUMAs = getMaxNUMANodes();
-		const size_t maxCPUs = getMaxCPUs();
+		const size_t maxNUMAs = numa_max_node() + 1;
+		const size_t maxCPUs = numa_num_possible_cpus();
 		
 		_cpuToNUMANode.resize(maxCPUs, -1);
 		_numaNodeAvailability.resize(maxNUMAs, false);
 		_numAvailableNUMANodes = 0;
 		
-		int maxAvailableCPU = -1;
-		int maxAvailableNUMA = -1;
+		size_t maxAvailableCPU = 0;
+		size_t maxAvailableNUMA = 0;
+#ifndef NDEBUG
+		size_t numAvailableCPUs = 0;
+#endif
+		
 		for (size_t c = 0; c < maxCPUs; ++c) {
 			if (numa_bitmask_isbitset(numa_all_cpus_ptr, c)) {
-				int numa = numa_node_of_cpu(c);
-				assert(numa >= 0);
+				size_t numa = numa_node_of_cpu(c);
 				assert(numa < maxNUMAs);
 				
 				_cpuToNUMANode[c] = numa;
@@ -54,14 +57,19 @@ public:
 				if (maxAvailableNUMA < numa) {
 					maxAvailableNUMA = numa;
 				}
+#ifndef NDEBUG
+				++numAvailableCPUs;
+#endif
 			}
 		}
-		assert(_numAvailableNUMAs > 0);
-		assert(maxAvailableCPU >= 0);
+		
+#ifndef NDEBUG
+		assert(_numAvailableNUMANodes > 0);
 		assert(maxAvailableCPU < maxCPUs);
-		assert(maxAvailableCPU + 1 == numa_num_task_cpus());
-		assert(maxAvailableNUMA >= 0);
+		assert(numAvailableCPUs < maxCPUs);
+		assert(numAvailableCPUs == (size_t) numa_num_task_cpus());
 		assert(maxAvailableNUMA < maxNUMAs);
+#endif
 		
 		_cpuToNUMANode.resize(maxAvailableCPU + 1);
 		_numaNodeAvailability.resize(maxAvailableNUMA + 1);
