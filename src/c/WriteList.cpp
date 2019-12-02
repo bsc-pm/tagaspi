@@ -1,6 +1,6 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
-	
+
 	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
 */
 
@@ -29,28 +29,28 @@ tagaspi_write_list(const gaspi_number_t num,
 {
 	assert(_env.enabled);
 	gaspi_return_t eret;
-	
+
 	void *counter = TaskingModel::getCurrentEventCounter();
 	assert(counter != NULL);
-	
+
 	gaspi_tag_t tag = (gaspi_tag_t) counter;
-	
+
 	gaspi_number_t numRequests = 0;
 	eret = gaspi_operation_get_num_requests(GASPI_OP_WRITE_LIST, num, &numRequests);
 	assert(eret == GASPI_SUCCESS);
 	assert(numRequests > 0);
-	
+
 	TaskingModel::increaseCurrentTaskEventCounter(counter, numRequests);
-	
+
 	eret = gaspi_operation_list_submit(GASPI_OP_WRITE_LIST, tag,
 				num, segment_id_local, offset_local, rank,
 				segment_id_remote, offset_remote, size,
 				0, 0, 0, queue, timeout_ms);
-	
+
 	if (eret != GASPI_SUCCESS) {
 		TaskingModel::decreaseTaskEventCounter(counter, numRequests);
 	}
-	
+
 	return eret;
 }
 

@@ -1,6 +1,6 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
-	
+
 	Copyright (C) 2019 Barcelona Supercomputing Center (BSC)
 */
 
@@ -21,7 +21,7 @@ private:
 	static increase_current_task_event_counter_t *_increaseCurrentTaskEventCounter;
 	static decrease_task_event_counter_t *_decreaseTaskEventCounter;
 	static notify_task_event_counter_api_t *_notifyTaskEventCounterAPI;
-	
+
 public:
 	static inline void initialize()
 	{
@@ -38,37 +38,37 @@ public:
 		_notifyTaskEventCounterAPI = (notify_task_event_counter_api_t *)
 			util::SymbolResolver::tryLoadSymbol("nanos6_notify_task_event_counter_api");
 	}
-	
+
 	static inline void registerPollingService(const std::string &name, nanos6_polling_service_t service, void *data = nullptr)
 	{
 		assert(_registerPollingService);
 		(*_registerPollingService)(name.c_str(), service, data);
 	}
-	
+
 	static inline void unregisterPollingService(const std::string &name, nanos6_polling_service_t service, void *data = nullptr)
 	{
 		assert(_unregisterPollingService);
 		(*_unregisterPollingService)(name.c_str(), service, data);
 	}
-	
+
 	static inline void *getCurrentEventCounter()
 	{
 		assert(_getCurrentEventCounter);
 		return (*_getCurrentEventCounter)();
 	}
-	
+
 	static inline void increaseCurrentTaskEventCounter(void *counter, unsigned int increment)
 	{
 		assert(_increaseCurrentTaskEventCounter);
 		(*_increaseCurrentTaskEventCounter)(counter, increment);
 	}
-	
+
 	static inline void decreaseTaskEventCounter(void *counter, unsigned int decrement)
 	{
 		assert(_decreaseTaskEventCounter);
 		(*_decreaseTaskEventCounter)(counter, decrement);
 	}
-	
+
 	static inline void notifyTaskEventCounterAPI()
 	{
 		if (_notifyTaskEventCounterAPI) {

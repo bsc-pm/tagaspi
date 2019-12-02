@@ -1,6 +1,6 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
-	
+
 	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
 */
 
@@ -27,19 +27,19 @@ tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t seg_id,
 {
 	assert(_env.enabled);
 	assert(seg_id < _env.maxSegments);
-	
+
 	if (num == 0) return GASPI_SUCCESS;
 	assert(num > 0);
-	
+
 	void *counter = TaskingModel::getCurrentEventCounter();
 	assert(counter != NULL);
 	TaskingModel::increaseCurrentTaskEventCounter(counter, 1);
-	
+
 	WaitingRange *waitingRange = Allocator<WaitingRange>::allocate(seg_id, noti_begin, num, noti_values, counter);
 	assert(waitingRange != nullptr);
-	
+
 	_env.waitingRangeQueues[seg_id].enqueue(waitingRange);
-	
+
 	return GASPI_SUCCESS;
 }
 

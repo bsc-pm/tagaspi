@@ -1,6 +1,6 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
-	
+
 	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
 */
 
@@ -18,10 +18,10 @@
 class Environment {
 private:
 	typedef util::SpinLock<> SpinLock;
-	
+
 public:
 	static const int MAX_QUEUE_GROUPS = 16;
-	
+
 	bool enabled;
 	gaspi_number_t maxQueues;
 	gaspi_number_t maxSegments;
@@ -33,7 +33,7 @@ public:
 	SpinLock *queuePollingLocks;
 	SpinLock notificationPollingLock;
 	SpinLock queueGroupsLock;
-	
+
 	Environment() :
 		enabled(false),
 		maxQueues(0),
@@ -47,9 +47,9 @@ public:
 		notificationPollingLock(),
 		queueGroupsLock()
 	{}
-	
+
 	static void initialize();
-	
+
 	static void finalize();
 };
 

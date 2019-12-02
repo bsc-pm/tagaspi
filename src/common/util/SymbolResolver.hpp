@@ -1,6 +1,6 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
-	
+
 	Copyright (C) 2019 Barcelona Supercomputing Center (BSC)
 */
 
@@ -24,7 +24,7 @@ public:
 		}
 		return symbol;
 	}
-	
+
 	static inline void *tryLoadSymbol(const std::string &symbolName)
 	{
 		return dlsym(RTLD_NEXT, symbolName.c_str());

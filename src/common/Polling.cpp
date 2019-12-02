@@ -1,6 +1,6 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
-	
+
 	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
 */
 
@@ -40,14 +40,14 @@ int Polling::pollQueues(void *data)
 {
 	gaspi_queue_id_t queue = (uintptr_t) data;
 	assert(queue < _env.maxQueues);
-	
+
 	gaspi_number_t completedReqs, numQueues, r;
 	gaspi_status_t statuses[NREQ];
 	gaspi_tag_t tags[NREQ];
 	gaspi_return_t eret;
-	
+
 	numQueues = std::min(queue + QPPS, _env.maxQueues);
-	
+
 	for (; queue < numQueues; ++queue) {
 		SpinLock &mutex = _env.queuePollingLocks[queue];
 		if (!mutex.trylock()) {
@@ -55,7 +55,7 @@ int Polling::pollQueues(void *data)
 			// are called from a single thread at a time
 			continue;
 		}
-		
+
 		do {
 			eret = gaspi_request_wait(queue, NREQ, &completedReqs, tags, statuses, GASPI_TEST);
 			if (eret != GASPI_SUCCESS && eret != GASPI_TIMEOUT) {
@@ -68,20 +68,20 @@ int Polling::pollQueues(void *data)
 				continue;
 			}
 			assert(completedReqs <= NREQ);
-			
+
 			for (r = 0; r < completedReqs; ++r) {
 				void *eventCounter = (void *) tags[r];
 				assert(eventCounter != nullptr);
-				
+
 				if (statuses[r].error != GASPI_SUCCESS) {
 					fprintf(stderr, "Error: TAGASPI operation with tag %lld failed\n", (gaspi_tag_t) eventCounter);
 					abort();
 				}
-				
+
 				TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
 			}
 		} while (completedReqs == NREQ);
-		
+
 		mutex.unlock();
 	}
 	return 0;
@@ -95,35 +95,35 @@ int Polling::pollNotifications(void *)
 		// are called from a single thread at a time
 		return 0;
 	}
-	
+
 	std::list<WaitingRange*> completeRanges;
 	std::list<WaitingRange*> pendingRanges;
-	
+
 	gaspi_segment_id_t seg;
 	bool repeat;
-	
+
 	for (seg = 0; seg < _env.maxSegments; ++seg) {
 		WaitingRangeQueue &queue = _env.waitingRangeQueues[seg];
 		WaitingRangeList &list = _env.waitingRangeLists[seg];
-		
+
 		do {
 			repeat = queue.dequeueSome(pendingRanges, completeRanges, 64);
 			list.checkNotifications(completeRanges);
 			list.splice(pendingRanges);
-			
+
 			for (WaitingRange *range : completeRanges) {
 				assert(range != nullptr);
-				
+
 				void *eventCounter = range->getEventCounter();
 				assert(eventCounter != nullptr);
-				
+
 				TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
 				Allocator<WaitingRange>::free(range);
 			}
 			completeRanges.clear();
 		} while (repeat);
 	}
-	
+
 	mutex.unlock();
 	return 0;
 }

@@ -1,6 +1,6 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
-	
+
 	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
 */
 
@@ -19,19 +19,19 @@
 class WaitingRangeQueue {
 private:
 	util::MPSCLockFreeQueue<WaitingRange*> _queue;
-	
+
 public:
 	inline WaitingRangeQueue(int capacity = WR_QUEUE_CAPACITY) :
 		_queue(capacity)
 	{
 		assert(capacity > 0);
 	}
-	
+
 	inline ~WaitingRangeQueue()
 	{
 		assert(_queue.empty());
 	}
-	
+
 	inline void enqueue(WaitingRange *waitingRange)
 	{
 		assert(waitingRange != nullptr);
@@ -39,14 +39,14 @@ public:
 			util::spinWait();
 		}
 	}
-	
+
 	inline bool dequeueSome(std::list<WaitingRange*> &pendingRanges, std::list<WaitingRange*> &completeRanges, int maximum)
 	{
 		assert(maximum > 0);
-		
+
 		WaitingRange *range = nullptr;
 		int dequeued = 0;
-		
+
 		do {
 			range = _queue.dequeue();
 			if (range != 0) {
@@ -58,7 +58,7 @@ public:
 				++dequeued;
 			}
 		} while (range != 0 && dequeued < maximum);
-		
+
 		if (dequeued == maximum) {
 			return !_queue.empty();
 		}

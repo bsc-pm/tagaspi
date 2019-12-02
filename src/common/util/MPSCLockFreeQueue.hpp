@@ -2,7 +2,7 @@
 
 /*
 	This file is part of Task-Aware MPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
-	
+
 	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
 */
 
@@ -25,15 +25,15 @@ template <typename T>
 class alignas(64) MPSCLockFreeQueue {
 private:
 	std::atomic<size_t> _count;
-	
+
 	std::atomic<size_t> _head;
-	
+
 	size_t _tail;
-	
+
 	size_t _capacity;
-	
+
 	std::atomic<T> *_buffer;
-	
+
 public:
 	inline MPSCLockFreeQueue(size_t capacity) :
 		_count(0),
@@ -45,20 +45,20 @@ public:
 		assert(capacity > 0);
 		_buffer = new std::atomic<T>[capacity];
 		assert(_buffer != nullptr);
-		
+
 		for (size_t i = 0; i < capacity; ++i) {
 			std::atomic_init(&_buffer[i], (T) 0);
 		}
 		std::atomic_thread_fence(std::memory_order_seq_cst);
 	}
-	
+
 	inline ~MPSCLockFreeQueue()
 	{
 		assert(!_count.load());
 		assert(_buffer != nullptr);
 		delete [] _buffer;
 	}
-	
+
 	inline bool enqueue(T obj)
 	{
 		size_t count = std::atomic_fetch_add_explicit(&_count, (size_t)1, std::memory_order_seq_cst);
@@ -67,18 +67,18 @@ public:
 			std::atomic_fetch_sub_explicit(&_count, (size_t)1, std::memory_order_seq_cst);
 			return false;
 		}
-		
+
 		/* Increment the head, which gives us 'exclusive' access to that element */
 		size_t head = std::atomic_fetch_add_explicit(&_head, (size_t)1, std::memory_order_seq_cst);
 		assert(_buffer[head % _capacity].load() == 0);
-		
+
 		T rv = std::atomic_exchange_explicit(&_buffer[head % _capacity], obj, std::memory_order_seq_cst);
 		UNUSED_VARIABLE(rv);
 		assert(rv == 0);
-		
+
 		return true;
 	}
-	
+
 	inline T dequeue()
 	{
 		T ret = std::atomic_exchange_explicit(&_buffer[_tail], (T) 0, std::memory_order_seq_cst);
@@ -91,28 +91,28 @@ public:
 			 * that has been filled in. */
 			return 0;
 		}
-		
+
 		if (++_tail >= _capacity) {
 			_tail = 0;
 		}
-		
+
 		size_t r = std::atomic_fetch_sub_explicit(&_count, (size_t)1, std::memory_order_seq_cst);
 		UNUSED_VARIABLE(r);
 		assert(r > 0);
-		
+
 		return ret;
 	}
-	
+
 	inline size_t size() const
 	{
 		return std::atomic_load_explicit(&_count, std::memory_order_seq_cst);
 	}
-	
+
 	inline bool empty() const
 	{
 		return size() == 0;
 	}
-	
+
 	inline size_t capacity() const
 	{
 		return _capacity;
