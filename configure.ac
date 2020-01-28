@@ -17,6 +17,7 @@ AX_DEBUG_MODE
 
 # Look for a valid C++ compiler
 AC_PROG_CXX
+AC_PROG_FC
 AX_CXX_COMPILE_STDCXX_11([], [mandatory])
 
 # AM_PROG_AR must be called before LT_INIT or a warning ensues

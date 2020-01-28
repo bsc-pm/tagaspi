@@ -2,7 +2,8 @@ ACLOCAL_AMFLAGS=-I m4
 
 EXTRA_DIST=\
  src/common/*.h\
- src/include/*.h
+ src/include/*.h\
+ src/fortran/*.f90
 
 AM_CPPFLAGS=\
  @gaspiinc@ \
@@ -60,6 +61,11 @@ noinst_HEADERS =                       \
  src/common/util/SpinLock.hpp          \
  src/common/util/SymbolResolver.hpp    \
  src/common/util/Utils.hpp
+
+tagaspi.mod: src/fortran/TAGASPI.f90
+	$(FC) @gaspiinc@ -O2 -c $< -o tagaspi.fortran.o
+
+nodist_include_HEADERS = tagaspi.mod
 
 lib_LTLIBRARIES=libtagaspi.la libtagaspi-c.la
 libtagaspi_la_SOURCES=$(common_sources) $(c_api_sources) $(fortran_api_sources)
