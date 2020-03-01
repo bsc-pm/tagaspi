@@ -1,6 +1,10 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+#	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
+#
+#	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+
 AC_PREREQ([2.69])
 AC_INIT([Task-aware GASPI library], [0.1], [pm-tools@bsc.es])
 
@@ -10,10 +14,8 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_LANG([C++])
 
-# Check if debug mode is enabled
-AX_DEBUG_MODE
-
-: ${CFLAGS=""}
+# Prepare compilation flags before AC_PROG_CXX
+AX_COMPILE_FLAGS
 
 # Look for a valid C++ compiler
 AC_PROG_CXX
@@ -44,6 +46,8 @@ AX_BOOST_BASE([1.59], [], [ AC_MSG_ERROR([Boost library not found])])
 AC_TYPE_SIZE_T
 
 AC_CHECK_EXTRACT_FIRST_COMPILER_FLAG([FALIGNED_NEW_FLAG], [-faligned-new])
+AX_APPEND_FLAG([${FALIGNED_NEW_FLAG}], [tagaspi_CXXFLAGS])
+AC_SUBST(tampi_CXXFLAGS)
 
 AX_CHECK_CPUS
 
@@ -64,6 +68,9 @@ echo ""
 echo ""
 echo "Configuration summary:"
 echo "    Installation prefix... ${prefix}"
+echo ""
+echo "    CXXFLAGS... ${tagaspi_CXXFLAGS} ${CXXFLAGS}"
+echo "    CPPFLAGS... ${tagaspi_CPPFLAGS} ${CPPFLAGS}"
 echo ""
 echo "    GASPI CPPFLAGS... ${gaspiinc}"
 echo ""

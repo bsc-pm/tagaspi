@@ -1,6 +1,6 @@
 #	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 #
-#	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+#	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 
 
 AC_DEFUN([AC_CHECK_COMPILER_FLAG],
@@ -64,29 +64,6 @@ AC_DEFUN([AC_CHECK_COMPILER_FLAG],
 	]
 )
 
-
-AC_DEFUN([AC_CHECK_COMPILER_FLAGS],
-	[
-		for check_flag in $1 ; do
-			AC_CHECK_COMPILER_FLAG([$check_flag])
-		done
-	]
-)
-
-
-AC_DEFUN([AC_CHECK_FIRST_COMPILER_FLAG],
-	[
-		ac_save2_[]_AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS"
-		for flag in $1 ; do
-			AC_CHECK_COMPILER_FLAG([$flag])
-			if test x"$ac_save2_[]_AC_LANG_PREFIX[]FLAGS" != x"$[]_AC_LANG_PREFIX[]FLAGS" ; then
-				break;
-			fi
-		done
-	]
-)
-
-
 dnl AC_CHECK_EXTRACT_FIRST_COMPILER_FLAG(VARIABLE-NAME, [list of flags])
 AC_DEFUN([AC_CHECK_EXTRACT_FIRST_COMPILER_FLAG],
 	[
@@ -103,67 +80,25 @@ AC_DEFUN([AC_CHECK_EXTRACT_FIRST_COMPILER_FLAG],
 	]
 )
 
+AC_DEFUN([AX_COMPILE_FLAGS], [
+	AC_ARG_ENABLE([debug-mode], [AS_HELP_STRING([--enable-debug-mode],
+		[Adds compiler debug flags and enables additional internal debugging mechanisms [default=disabled]])])
 
-# This should be called before AC_PROG_CXX
-AC_DEFUN([SSS_PREPARE_COMPILER_FLAGS],
-	[
-		AC_ARG_VAR(DEBUG_CXXFLAGS, [C++ compiler flags for debugging versions])
-		AC_ARG_VAR(PROFILE_CXXFLAGS, [C++ compiler flags for profiling versions])
-		
-		user_CXXFLAGS="${CXXFLAGS}"
-		# Do not let autoconf set up its own set of configure flags
-		CXXFLAGS=" "
-	]
-)
+	AS_IF([test "$enable_debug_mode" = yes],[
+		# Debug mode is enabled
+		tagaspi_CPPFLAGS=""
+		tagaspi_CXXFLAGS="-O0 -g3 -Wall -Wextra"
+	],[
+		# Debug mode is enabled
+		tagaspi_CPPFLAGS="-DNDEBUG"
+		tagaspi_CXXFLAGS="-O3 -fno-rtti -fno-exceptions -fvisibility-inlines-hidden -Wall -Wextra"
+	])
 
+	AC_SUBST(tagaspi_CPPFLAGS)
+	AC_SUBST(tagaspi_CXXFLAGS)
 
-# This should be called after the value of CXXFLAGS has settled
-AC_DEFUN([SSS_FIXUP_COMPILER_FLAGS],
-	[
-		AC_LANG_PUSH(C++)
-		
-		AC_CHECK_COMPILER_FLAGS([-Wall -Wextra -Wdisabled-optimization -Wshadow -fvisibility=hidden])
-		
-		autoconf_calculated_cxxflags="${CXXFLAGS}"
-		
-		# Fill in DEBUG_CXXFLAGS
-		if test x"${DEBUG_CXXFLAGS}" != x"" ; then
-			DEBUG_CXXFLAGS="${autoconf_calculated_cxxflags} ${DEBUG_CXXFLAGS}"
-		else
-			#AC_CHECK_FIRST_COMPILER_FLAG([-Og -O0])
-			AC_CHECK_COMPILER_FLAG([-O0])
-			AC_CHECK_FIRST_COMPILER_FLAG([-g3 -g2 -g])
-			AC_CHECK_FIRST_COMPILER_FLAG([-fstack-security-check -fstack-protector-all])
-			DEBUG_CXXFLAGS="${CXXFLAGS}"
-		fi
-		
-		if test x"${PROFILE_CXXFLAGS}" != x"" ; then
-			PROFILE_CXXFLAGS="${autoconf_calculated_cxxflags} ${PROFILE_CXXFLAGS}"
-		fi
-		
-		# Fill in CXXFLAGS
-		CXXFLAGS="${autoconf_calculated_cxxflags}"
-		if test x"${user_CXXFLAGS}" != x"" ; then
-			OPT_CXXFLAGS="${user_CXXFLAGS}"
-		else
-			AC_CHECK_FIRST_COMPILER_FLAG([-O3 -O2 -O])
-			if test x"${PROFILE_CXXFLAGS}" != x"" ; then
-				OPT_CXXFLAGS="${CXXFLAGS}"
-				AC_CHECK_FIRST_COMPILER_FLAG([-g3 -g2 -g])
-				PROFILE_CXXFLAGS="${CXXFLAGS}"
-				CXXFLAGS=${OPT_CXXFLAGS}
-			fi
-			AC_CHECK_COMPILER_FLAG([-flto])
-			OPT_CXXFLAGS="${CXXFLAGS}"
-		fi
-		
-		CXXFLAGS="${autoconf_calculated_cxxflags}"
-		
-		AC_SUBST(DEBUG_CXXFLAGS)
-		AC_SUBST(OPT_CXXFLAGS)
-		AC_SUBST(PROFILE_CXXFLAGS)
-		
-		AC_LANG_POP(C++)
-	]
-)
-
+	# Disable autoconf default compilation flags
+	: ${CPPFLAGS=""}
+	: ${CXXFLAGS=""}
+	: ${CFLAGS=""}
+])

@@ -1,3 +1,7 @@
+#	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
+#
+#	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+
 ACLOCAL_AMFLAGS=-I m4
 
 EXTRA_DIST=\
@@ -11,16 +15,10 @@ AM_CPPFLAGS=\
  -I@top_srcdir@/src \
  -I@top_srcdir@/src/include \
  -include "config.h" \
- $(CPPFLAGS)
+ $(tagaspi_CPPFLAGS)
 
-if debug_mode_enabled
-AM_CXXFLAGS=-O0 -g3 -std=c++11 -Wall -Wextra $(CXXFLAGS)
-else
-AM_CXXFLAGS=-O3 -std=c++11 -fno-exceptions -Wall -Wextra $(CXXFLAGS)
-endif
-AM_CXXFLAGS += $(FALIGNED_NEW_FLAG)
-
-AM_LDFLAGS=$(BOOST_LDFLAGS) -ldl $(LDFLAGS)
+AM_CXXFLAGS=$(tagaspi_CXXFLAGS)
+AM_LDFLAGS=$(BOOST_LDFLAGS) -ldl
 LIBS=
 
 include_HEADERS= src/include/TAGASPI.h
