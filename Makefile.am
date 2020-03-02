@@ -10,10 +10,10 @@ EXTRA_DIST=\
  src/fortran/*.f90
 
 AM_CPPFLAGS=\
- @gaspiinc@ \
+ $(gaspiinc) \
  $(BOOST_CPPFLAGS) -DBOOST_ENABLE_ASSERT_DEBUG_HANDLER \
- -I@top_srcdir@/src \
- -I@top_srcdir@/src/include \
+ -I$(top_srcdir)/src \
+ -I$(top_srcdir)/src/include \
  -include "config.h" \
  $(tagaspi_CPPFLAGS)
 
@@ -61,7 +61,7 @@ noinst_HEADERS =                       \
  src/common/util/Utils.hpp
 
 tagaspi.mod: src/fortran/TAGASPI.f90
-	$(FC) @gaspiinc@ -O2 -c $< -o tagaspi.fortran.o
+	$(FC) $(gaspiinc) -O2 -c $< -o tagaspi.fortran.o
 
 nodist_include_HEADERS = tagaspi.mod
 
@@ -70,3 +70,5 @@ libtagaspi_la_SOURCES=$(common_sources) $(c_api_sources) $(fortran_api_sources)
 libtagaspi_c_la_SOURCES=$(common_sources) $(c_api_sources)
 #libtagaspi_fortran_la_SOURCES=$(common_sources) $(fortran_api_sources)
 
+# Extra files to clean
+CLEANFILES = *.mod
