@@ -1,79 +1,240 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2019-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef TASKING_MODEL_HPP
 #define TASKING_MODEL_HPP
 
+#include <atomic>
 #include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <string>
 
 #include "TaskingModelAPI.hpp"
-#include "util/SymbolResolver.hpp"
+#include "util/EnvironmentVariable.hpp"
 
 
+//! Class that gives access to the tasking model features
 class TaskingModel {
+public:
+	//! Prototype of a polling instance function
+	typedef void (*polling_function_t)(void *args);
+
+	//! Handle of polling instances
+	typedef size_t polling_handle_t;
+
 private:
+	//! Pointers to the tasking model functions
 	static register_polling_service_t *_registerPollingService;
 	static unregister_polling_service_t *_unregisterPollingService;
 	static get_current_event_counter_t *_getCurrentEventCounter;
 	static increase_current_task_event_counter_t *_increaseCurrentTaskEventCounter;
 	static decrease_task_event_counter_t *_decreaseTaskEventCounter;
 	static notify_task_event_counter_api_t *_notifyTaskEventCounterAPI;
+	static spawn_function_t *_spawnFunction;
+	static wait_for_t *_waitFor;
+
+	//! Actual names of the tasking model functions
+	static const std::string _registerPollingServiceName;
+	static const std::string _unregisterPollingServiceName;
+	static const std::string _getCurrentEventCounterName;
+	static const std::string _increaseCurrentTaskEventCounterName;
+	static const std::string _decreaseTaskEventCounterName;
+	static const std::string _notifyTaskEventCounterAPIName;
+	static const std::string _spawnFunctionName;
+	static const std::string _waitForName;
+
+	//! Determine whether the polling feature should be done through
+	//! polling services. By default it is disabled, which makes the
+	//! polling feature to be implemented using tasks that are paused
+	//! periodically. This variable is called TAGASPI_POLLING_SERVICES
+	static EnvironmentVariable<bool> _usePollingServices;
+
+	//! Internal structure to represent a polling instance
+	struct PollingInfo {
+		std::string _name;
+		polling_function_t _function;
+		void *_args;
+		uint64_t _frequency;
+		std::atomic<bool> _mustFinish;
+		std::atomic<bool> _finished;
+
+		inline PollingInfo(
+			const std::string &name,
+			polling_function_t function,
+			void *args,
+			uint64_t frequency
+		) :
+			_name(name),
+			_function(function),
+			_args(args),
+			_frequency(frequency),
+			_mustFinish(false),
+			_finished(false)
+		{
+		}
+	};
 
 public:
-	static inline void initialize()
-	{
-		_registerPollingService = (register_polling_service_t *)
-			util::SymbolResolver::loadSymbol("nanos6_register_polling_service");
-		_unregisterPollingService = (unregister_polling_service_t *)
-			util::SymbolResolver::loadSymbol("nanos6_unregister_polling_service");
-		_getCurrentEventCounter = (get_current_event_counter_t *)
-			util::SymbolResolver::loadSymbol("nanos6_get_current_event_counter");
-		_increaseCurrentTaskEventCounter = (increase_current_task_event_counter_t *)
-			util::SymbolResolver::loadSymbol("nanos6_increase_current_task_event_counter");
-		_decreaseTaskEventCounter = (decrease_task_event_counter_t *)
-			util::SymbolResolver::loadSymbol("nanos6_decrease_task_event_counter");
-		_notifyTaskEventCounterAPI = (notify_task_event_counter_api_t *)
-			util::SymbolResolver::tryLoadSymbol("nanos6_notify_task_event_counter_api");
+	//! \brief Initialize and load the symbols of the tasking model
+	static void initialize();
+
+	//! \brief Register a polling instance
+	//!
+	//! This function registers a polling instance, which will call
+	//! the specified function with its argument periodically. The
+	//! polling function must accept a pointer to void and should
+	//! not return anything
+	//!
+	//! \param name The name of the polling instance
+	//! \param function The function to be called periodically
+	//! \param args The arguments of the function
+	//! \param frequency The frequency at which to call the function
+	//!                  in microseconds. This parameter is ignored
+	//!                  when leveraging polling services
+	//!
+	//! \returns A polling handle to unregister the instance once
+	//!          the polling should finish
+	static inline polling_handle_t registerPolling(
+		const std::string &name,
+		polling_function_t function,
+		void *args,
+		uint64_t frequency
+	) {
+		PollingInfo *info = new PollingInfo(name, function, args, frequency);
+		assert(info != nullptr);
+
+		if (_usePollingServices) {
+			// Register a polling service
+			assert(_registerPollingService);
+			(*_registerPollingService)(name.c_str(), pollingServiceFunction, info);
+		} else {
+			// Spawn a function that will do the periodic polling
+			assert(_spawnFunction);
+			(*_spawnFunction)(pollingTaskFunction, info, pollingTaskCompletes, info, name.c_str());
+		}
+		return (polling_handle_t) info;
 	}
 
-	static inline void registerPollingService(const std::string &name, nanos6_polling_service_t service, void *data = nullptr)
+	//! \brief Unregister a polling instance
+	//!
+	//! This function unregisters a polling instance, which will
+	//! prevent the associated polling function from being further
+	//! called. The polling function is guaranteed to not be called
+	//! after returing from this function. Note that other registered
+	//! polling instances may continue calling that function
+	//!
+	//! \param handle The handle of the polling instance to unregister
+	static inline void unregisterPolling(polling_handle_t handle)
 	{
-		assert(_registerPollingService);
-		(*_registerPollingService)(name.c_str(), service, data);
+		PollingInfo *info = (PollingInfo *) handle;
+		assert(info != nullptr);
+
+		// Notify that the polling should stop
+		info->_mustFinish = true;
+
+		if (_usePollingServices) {
+			// Unregister the polling service
+			assert(_unregisterPollingService);
+			(*_unregisterPollingService)(info->_name.c_str(), pollingServiceFunction, info);
+		} else {
+			// Wait until the spawned task completes
+			while (!info->_finished);
+		}
+		delete info;
 	}
 
-	static inline void unregisterPollingService(const std::string &name, nanos6_polling_service_t service, void *data = nullptr)
-	{
-		assert(_unregisterPollingService);
-		(*_unregisterPollingService)(name.c_str(), service, data);
-	}
-
+	//! \brief Get the event counter of the current task
+	//!
+	//! \returns An opaque pointer of the event counter
 	static inline void *getCurrentEventCounter()
 	{
 		assert(_getCurrentEventCounter);
 		return (*_getCurrentEventCounter)();
 	}
 
+	//! \brief Increase the event counter of the current task
+	//!
+	//! \param counter The event counter of the current task
+	//! \param increment The amount of events to increase
 	static inline void increaseCurrentTaskEventCounter(void *counter, unsigned int increment)
 	{
 		assert(_increaseCurrentTaskEventCounter);
 		(*_increaseCurrentTaskEventCounter)(counter, increment);
 	}
 
+	//! \brief Decrease the event counter of a task
+	//!
+	//! \param counter The event counter of the target task
+	//! \param decrement The amount of events to decrease
 	static inline void decreaseTaskEventCounter(void *counter, unsigned int decrement)
 	{
 		assert(_decreaseTaskEventCounter);
 		(*_decreaseTaskEventCounter)(counter, decrement);
 	}
 
-	static inline void notifyTaskEventCounterAPI()
+private:
+	//! \brief Function called by all polling services
+	//!
+	//! This function is periodically called by all polling
+	//! services when implementing polling instances with
+	//! that tasking model feature
+	//!
+	//! \param args An opaque pointer to the polling info
+	//!
+	//! \returns Whether the polling service should unregister
+	static inline int pollingServiceFunction(void *args)
 	{
-		if (_notifyTaskEventCounterAPI) {
-			(*_notifyTaskEventCounterAPI)();
+		PollingInfo *info = (PollingInfo *) args;
+		assert(info != nullptr);
+
+		// Call the actual polling function
+		info->_function(info->_args);
+
+		// Do not unregister the service
+		return 0;
+	}
+
+	//! \brief Function called by all polling tasks
+	//!
+	//! This is called only once per polling task when
+	//! implementing polling instances with that tasking
+	//! model feature. This represents the body of all
+	//! polling tasks
+	//!
+	//! \param args An opaque pointer to the polling info
+	static inline void pollingTaskFunction(void *args)
+	{
+		PollingInfo *info = (PollingInfo *) args;
+		assert(info != nullptr);
+		assert(_waitFor);
+
+		// Poll until it is externally notified to stop
+		while (!info->_mustFinish) {
+			// Call the actual polling function
+			info->_function(info->_args);
+
+			// Pause the polling task for some microseconds
+			(*_waitFor)(info->_frequency);
 		}
+	}
+
+	//! \brief Function called by a polling task when completes
+	//!
+	//! This function is called when a polling task fully
+	//! completes (e.g., all child tasks have completed)
+	//!
+	//! \param args An opaque pointer to the polling info
+	static inline void pollingTaskCompletes(void *args)
+	{
+		PollingInfo *info = (PollingInfo *) args;
+		assert(info != nullptr);
+
+		// The polling task has completed
+		info->_finished = true;
 	}
 };
 

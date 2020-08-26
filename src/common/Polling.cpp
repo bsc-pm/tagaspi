@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -20,23 +20,46 @@
 #include <cassert>
 
 
+EnvironmentVariable<uint64_t> Polling::_pollingFrequency("TAGASPI_POLLING_FREQUENCY", 500);
+TaskingModel::polling_handle_t *Polling::_queuesPollingHandles;
+TaskingModel::polling_handle_t Polling::_notificationsPollingHandle;
+
+
 void Polling::initialize()
 {
-	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPS) {
-		TaskingModel::registerPollingService("TAGASPI QUEUES", pollQueues, (void*)(uintptr_t)q);
+	assert(_env.maxQueues > 0);
+
+	const gaspi_number_t numQueuePollingHandles = 1 + ((_env.maxQueues - 1) / QPPI);
+
+	_queuesPollingHandles = new TaskingModel::polling_handle_t[numQueuePollingHandles];
+	assert(_queuesPollingHandles != nullptr);
+
+	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPI) {
+		_queuesPollingHandles[q / QPPI] = TaskingModel::registerPolling(
+			"TAGASPI QUEUES",
+			pollQueues, (void *)(uintptr_t) q,
+			_pollingFrequency
+		);
 	}
-	TaskingModel::registerPollingService("TAGASPI NOTIFICATIONS", pollNotifications, nullptr);
+
+	_notificationsPollingHandle = TaskingModel::registerPolling(
+		"TAGASPI NOTIFICATIONS",
+		pollNotifications, nullptr,
+		_pollingFrequency
+	);
 }
 
 void Polling::finalize()
 {
-	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPS) {
-		TaskingModel::unregisterPollingService("TAGASPI QUEUES", pollQueues, (void*)(uintptr_t)q);
+	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPI) {
+		TaskingModel::unregisterPolling(_queuesPollingHandles[q / QPPI]);
 	}
-	TaskingModel::unregisterPollingService("TAGASPI NOTIFICATIONS", pollNotifications, nullptr);
+	TaskingModel::unregisterPolling(_notificationsPollingHandle);
+
+	delete [] _queuesPollingHandles;
 }
 
-int Polling::pollQueues(void *data)
+void Polling::pollQueues(void *data)
 {
 	gaspi_queue_id_t queue = (uintptr_t) data;
 	assert(queue < _env.maxQueues);
@@ -46,7 +69,7 @@ int Polling::pollQueues(void *data)
 	gaspi_tag_t tags[NREQ];
 	gaspi_return_t eret;
 
-	numQueues = std::min(queue + QPPS, _env.maxQueues);
+	numQueues = std::min(queue + QPPI, _env.maxQueues);
 
 	for (; queue < numQueues; ++queue) {
 		SpinLock &mutex = _env.queuePollingLocks[queue];
@@ -84,16 +107,15 @@ int Polling::pollQueues(void *data)
 
 		mutex.unlock();
 	}
-	return 0;
 }
 
-int Polling::pollNotifications(void *)
+void Polling::pollNotifications(void *)
 {
 	SpinLock &mutex = _env.notificationPollingLock;
 	if (!mutex.trylock()) {
 		// This should not happen since polling services
 		// are called from a single thread at a time
-		return 0;
+		return;
 	}
 
 	std::list<WaitingRange*> completeRanges;
@@ -125,6 +147,5 @@ int Polling::pollNotifications(void *)
 	}
 
 	mutex.unlock();
-	return 0;
 }
 

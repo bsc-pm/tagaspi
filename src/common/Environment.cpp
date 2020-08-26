@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -12,13 +12,17 @@
 #include "Polling.hpp"
 #include "TaskingModel.hpp"
 #include "WaitingRange.hpp"
+#include "util/SpinLock.hpp"
 
 #include <cassert>
 
+
 Environment _env;
+
 std::vector<int> HardwareInfo::_cpuToNUMANode;
 std::vector<bool> HardwareInfo::_numaNodeAvailability;
 size_t HardwareInfo::_numAvailableNUMANodes;
+
 
 void Environment::initialize()
 {

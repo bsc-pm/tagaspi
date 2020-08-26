@@ -44,20 +44,21 @@ common_sources=              \
  src/common/Polling.cpp      \
  src/common/TaskingModel.cpp
 
-noinst_HEADERS =                       \
- src/common/Allocator.hpp              \
- src/common/Environment.hpp            \
- src/common/HardwareInfo.hpp           \
- src/common/Polling.hpp                \
- src/common/QueueGroup.hpp             \
- src/common/TaskingModelAPI.hpp        \
- src/common/TaskingModel.hpp           \
- src/common/WaitingRange.hpp           \
- src/common/WaitingRangeList.hpp       \
- src/common/WaitingRangeQueue.hpp      \
- src/common/util/MPSCLockFreeQueue.hpp \
- src/common/util/SpinLock.hpp          \
- src/common/util/SymbolResolver.hpp    \
+noinst_HEADERS =                         \
+ src/common/Allocator.hpp                \
+ src/common/Environment.hpp              \
+ src/common/HardwareInfo.hpp             \
+ src/common/Polling.hpp                  \
+ src/common/QueueGroup.hpp               \
+ src/common/TaskingModelAPI.hpp          \
+ src/common/TaskingModel.hpp             \
+ src/common/WaitingRange.hpp             \
+ src/common/WaitingRangeList.hpp         \
+ src/common/WaitingRangeQueue.hpp        \
+ src/common/util/EnvironmentVariable.hpp \
+ src/common/util/MPSCLockFreeQueue.hpp   \
+ src/common/util/SpinLock.hpp            \
+ src/common/util/SymbolResolver.hpp      \
  src/common/util/Utils.hpp
 
 tagaspi.mod: src/fortran/TAGASPI.f90
