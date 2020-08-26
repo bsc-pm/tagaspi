@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef ENVIRONMENT_HPP
@@ -16,9 +16,6 @@
 
 
 class Environment {
-private:
-	typedef util::SpinLock<> SpinLock;
-
 public:
 	static const int MAX_QUEUE_GROUPS = 16;
 

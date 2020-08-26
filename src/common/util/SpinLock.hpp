@@ -1,30 +1,34 @@
 /*
-	This file is part of Task-Aware MPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
+	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2019-2020 Barcelona Supercomputing Center (BSC)
 */
 
-#ifndef SPIN_MUTEX_HPP
-#define SPIN_MUTEX_HPP
+#ifndef SPIN_LOCK_HPP
+#define SPIN_LOCK_HPP
 
 #include "Utils.hpp"
 
 #include <atomic>
 
-namespace util {
 
-template <size_t Size = MAX_SYSTEM_CPUS>
 class SpinLock {
 private:
-	alignas(CACHELINE_SIZE) Padded<std::atomic<size_t> > _buffer[Size] = {};
+	const static size_t Size = MAX_SYSTEM_CPUS;
+
+	alignas(CACHELINE_SIZE) util::Padded<std::atomic<size_t> > _buffer[Size];
 	alignas(CACHELINE_SIZE) std::atomic<size_t> _head;
 	alignas(CACHELINE_SIZE) size_t _next;
 
 public:
-	SpinLock()
-		: _head(0),
+	SpinLock() :
+		_head(0),
 		_next(0)
-	{}
+	{
+		for (size_t i = 0; i < Size; ++i) {
+			std::atomic_init(_buffer[i].ptr_to_basetype(), (size_t) 0);
+		}
+	}
 
 	inline void lock()
 	{
@@ -42,10 +46,10 @@ public:
 		if (_buffer[idx].load(std::memory_order_relaxed) != head)
 			return false;
 
-		return std::atomic_compare_exchange_weak_explicit(
-					&_head, &head, head + 1,
-					std::memory_order_acquire,
-					std::memory_order_relaxed);
+		return std::atomic_compare_exchange_strong_explicit(
+			&_head, &head, head + 1,
+			std::memory_order_acquire,
+			std::memory_order_relaxed);
 	}
 
 	inline void unlock()
@@ -55,7 +59,5 @@ public:
 	}
 };
 
-} // namespace util
-
-#endif // SPIN_MUTEX_HPP
+#endif // SPIN_LOCK_HPP
 
