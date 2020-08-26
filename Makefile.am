@@ -12,13 +12,14 @@ EXTRA_DIST=\
 AM_CPPFLAGS=\
  $(gaspiinc) \
  $(BOOST_CPPFLAGS) -DBOOST_ENABLE_ASSERT_DEBUG_HANDLER \
+ $(libnuma_CPPFLAGS) \
  -I$(top_srcdir)/src \
  -I$(top_srcdir)/src/include \
  -include "config.h" \
  $(tagaspi_CPPFLAGS)
 
 AM_CXXFLAGS=$(tagaspi_CXXFLAGS)
-AM_LDFLAGS=$(BOOST_LDFLAGS) -ldl
+AM_LDFLAGS=$(BOOST_LDFLAGS) $(libnuma_LIBS) -ldl
 LIBS=
 
 include_HEADERS= src/include/TAGASPI.h
