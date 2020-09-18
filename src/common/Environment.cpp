@@ -15,6 +15,8 @@
 #include "util/SpinLock.hpp"
 
 #include <cassert>
+#include <cstdio>
+#include <cstdlib>
 
 
 Environment _env;
@@ -51,6 +53,7 @@ void Environment::initialize()
 	assert(_env.queuePollingLocks != nullptr);
 
 	Allocator<WaitingRange>::initialize();
+	Allocator<AckWaitingRange>::initialize();
 
 	_env.enabled = true;
 	std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -69,6 +72,7 @@ void Environment::finalize()
 	Polling::finalize();
 
 	Allocator<WaitingRange>::finalize();
+	Allocator<AckWaitingRange>::finalize();
 
 	delete [] _env.queuePollingLocks;
 	delete [] _env.waitingRangeQueues;
@@ -80,4 +84,20 @@ void Environment::finalize()
 
 	HardwareInfo::finalize();
 }
+
+#if !defined(NDEBUG)
+namespace boost {
+	void assertion_failed_msg(char const * expr, char const * msg, char const * function, char const * file, long line)
+	{
+		fprintf(stderr, "%s:%ld %s Boost assertion failure: %s when evaluating %s\n", file, line, function, msg, expr);
+		abort();
+	}
+
+	void assertion_failed(char const * expr, char const * function, char const * file, long line)
+	{
+		fprintf(stderr, "%s:%ld %s Boost assertion failure when evaluating %s\n", file, line, function, expr);
+		abort();
+	}
+}
+#endif
 

@@ -1,7 +1,7 @@
 !
 !   This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 !
-!   Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+!   Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 !
 
 !-----------------------------------------------------------------------
@@ -187,6 +187,77 @@ module TAGASPI
     integer(gaspi_timeout_t), value :: timeout_ms
     integer(gaspi_return_t) :: res
       end function tagaspi_write_list_notify
+    end interface
+
+    interface ! tagaspi_ack_write
+      function tagaspi_ack_write(ack_segment_id, &
+&         ack_notification_begin,ack_notification_num, &
+&         ack_notification_values, &
+&         segment_id_local,offset_local,rank, &
+&         segment_id_remote,offset_remote, &
+&         size,queue) &
+&         result( res ) bind(C, name="tagaspi_ack_write")
+    import
+    integer(gaspi_segment_id_t), value :: ack_segment_id
+    integer(gaspi_notification_id_t), value :: ack_notification_begin
+    integer(gaspi_number_t), value :: ack_notification_num
+    integer(gaspi_notification_t) :: ack_notification_values
+    integer(gaspi_segment_id_t), value :: segment_id_local
+    integer(gaspi_offset_t), value :: offset_local
+    integer(gaspi_rank_t), value :: rank
+    integer(gaspi_segment_id_t), value :: segment_id_remote
+    integer(gaspi_offset_t), value :: offset_remote
+    integer(gaspi_size_t), value :: size
+    integer(gaspi_queue_id_t), value :: queue
+    integer(gaspi_return_t) :: res
+      end function tagaspi_ack_write
+    end interface
+
+    interface ! tagaspi_ack_notify
+      function tagaspi_ack_notify(ack_segment_id, &
+&         ack_notification_begin,ack_notification_num, &
+&         ack_notification_values, &
+&         segment_id_remote,rank, &
+&         notification_id,notification_value,queue) &
+&         result( res ) bind(C, name="tagaspi_ack_notify")
+    import
+    integer(gaspi_segment_id_t), value :: ack_segment_id
+    integer(gaspi_notification_id_t), value :: ack_notification_begin
+    integer(gaspi_number_t), value :: ack_notification_num
+    integer(gaspi_notification_t) :: ack_notification_values
+    integer(gaspi_segment_id_t), value :: segment_id_remote
+    integer(gaspi_rank_t), value :: rank
+    integer(gaspi_notification_id_t), value :: notification_id
+    integer(gaspi_notification_t), value :: notification_value
+    integer(gaspi_queue_id_t), value :: queue
+    integer(gaspi_return_t) :: res
+      end function tagaspi_ack_notify
+    end interface
+
+    interface ! tagaspi_ack_write_notify
+      function tagaspi_ack_write_notify(ack_segment_id, &
+&         ack_notification_begin,ack_notification_num, &
+&         ack_notification_values, &
+&         segment_id_local,offset_local,rank, &
+&         segment_id_remote,offset_remote, &
+&         size,notification_id,notification_value,queue) &
+&         result( res ) bind(C, name="tagaspi_ack_write_notify")
+    import
+    integer(gaspi_segment_id_t), value :: ack_segment_id
+    integer(gaspi_notification_id_t), value :: ack_notification_begin
+    integer(gaspi_number_t), value :: ack_notification_num
+    integer(gaspi_notification_t) :: ack_notification_values
+    integer(gaspi_segment_id_t), value :: segment_id_local
+    integer(gaspi_offset_t), value :: offset_local
+    integer(gaspi_rank_t), value :: rank
+    integer(gaspi_segment_id_t), value :: segment_id_remote
+    integer(gaspi_offset_t), value :: offset_remote
+    integer(gaspi_size_t), value :: size
+    integer(gaspi_notification_id_t), value :: notification_id
+    integer(gaspi_notification_t), value :: notification_value
+    integer(gaspi_queue_id_t), value :: queue
+    integer(gaspi_return_t) :: res
+      end function tagaspi_ack_write_notify
     end interface
 
     interface ! tagaspi_queue_group_create

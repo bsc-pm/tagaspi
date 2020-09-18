@@ -34,13 +34,16 @@ c_api_sources=               \
  src/c/WriteList.cpp         \
  src/c/ReadList.cpp          \
  src/c/WriteListNotify.cpp   \
+ src/c/AckWrite.cpp          \
+ src/c/AckRead.cpp           \
+ src/c/AckNotify.cpp         \
+ src/c/AckWriteNotify.cpp    \
  src/c/AsyncWaitallReset.cpp \
  src/c/QueueGroups.cpp
 
 fortran_api_sources=
 
 common_sources=              \
- src/common/Allocator.cpp    \
  src/common/Environment.cpp  \
  src/common/Polling.cpp      \
  src/common/TaskingModel.cpp

@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -20,25 +20,37 @@ extern "C" {
 #endif
 
 gaspi_return_t
-tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t seg_id,
-		const gaspi_notification_id_t noti_begin,
-		const gaspi_number_t num,
-		gaspi_notification_t noti_values[])
+tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t segment_id,
+		const gaspi_notification_id_t notification_begin,
+		const gaspi_number_t notification_num,
+		gaspi_notification_t notification_values[])
 {
 	assert(_env.enabled);
-	assert(seg_id < _env.maxSegments);
+	assert(segment_id < _env.maxSegments);
 
-	if (num == 0) return GASPI_SUCCESS;
-	assert(num > 0);
+	if (notification_num == 0)
+		return GASPI_SUCCESS;
+
+	gaspi_number_t remaining = WaitingRange::checkNotifications(
+		segment_id, notification_begin, notification_num,
+		notification_values, notification_num);
+
+	if (remaining == 0)
+		return GASPI_SUCCESS;
 
 	void *counter = TaskingModel::getCurrentEventCounter();
 	assert(counter != NULL);
+
 	TaskingModel::increaseCurrentTaskEventCounter(counter, 1);
 
-	WaitingRange *waitingRange = Allocator<WaitingRange>::allocate(seg_id, noti_begin, num, noti_values, counter);
+	WaitingRange *waitingRange =
+		Allocator<WaitingRange>::allocate(
+			segment_id, notification_begin,
+			notification_num, notification_values,
+			remaining, counter);
 	assert(waitingRange != nullptr);
 
-	_env.waitingRangeQueues[seg_id].enqueue(waitingRange);
+	_env.waitingRangeQueues[segment_id].enqueue(waitingRange);
 
 	return GASPI_SUCCESS;
 }

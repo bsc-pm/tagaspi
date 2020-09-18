@@ -84,7 +84,7 @@ void Polling::pollQueues(void *data)
 			if (eret != GASPI_SUCCESS && eret != GASPI_TIMEOUT) {
 				// We are probably cheking queues that are not created
 				if (eret != GASPI_ERR_INV_QUEUE) {
-					fprintf(stderr, "Error: Unexpected return code from gaspi_request_wait\n");
+					fprintf(stderr, "Error: Return code %d from gaspi_request_wait\n", eret);
 					abort();
 				}
 				completedReqs = 0;
@@ -136,11 +136,13 @@ void Polling::pollNotifications(void *)
 			for (WaitingRange *range : completeRanges) {
 				assert(range != nullptr);
 
-				void *eventCounter = range->getEventCounter();
-				assert(eventCounter != nullptr);
+				range->complete();
 
-				TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
-				Allocator<WaitingRange>::free(range);
+				if (range->isAckWaitingRange()) {
+					Allocator<AckWaitingRange>::free((AckWaitingRange *) range);
+				} else {
+					Allocator<WaitingRange>::free(range);
+				}
 			}
 			completeRanges.clear();
 		} while (repeat);

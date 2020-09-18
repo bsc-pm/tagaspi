@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef WAITING_RANGE_LIST_HPP
@@ -19,14 +19,16 @@ private:
 public:
 	inline WaitingRangeList() :
 		_list()
-	{}
+	{
+	}
 
 	inline ~WaitingRangeList()
 	{
 		assert(_list.empty());
 	}
 
-	inline void splice(std::list<WaitingRange*> &pendingRanges) {
+	inline void splice(std::list<WaitingRange*> &pendingRanges)
+	{
 		if (!pendingRanges.empty()) {
 			_list.splice(_list.end(), pendingRanges);
 		}

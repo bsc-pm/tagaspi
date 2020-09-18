@@ -43,7 +43,8 @@ public:
 		queuePollingLocks(nullptr),
 		notificationPollingLock(),
 		queueGroupsLock()
-	{}
+	{
+	}
 
 	static void initialize();
 

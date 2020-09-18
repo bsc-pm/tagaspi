@@ -123,6 +123,58 @@ tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t segment_id_local,
 		gaspi_notification_t old_notification_values[]);
 
 gaspi_return_t
+tagaspi_ack_write(const gaspi_segment_id_t ack_segment_id,
+		const gaspi_notification_id_t ack_notification_begin,
+		const gaspi_number_t ack_notification_num,
+		gaspi_notification_t ack_notification_values[],
+		const gaspi_segment_id_t segment_id_local,
+		const gaspi_offset_t offset_local,
+		const gaspi_rank_t rank,
+		const gaspi_segment_id_t segment_id_remote,
+		const gaspi_offset_t offset_remote,
+		const gaspi_size_t size,
+		const gaspi_queue_id_t queue);
+
+gaspi_return_t
+tagaspi_ack_read(const gaspi_segment_id_t ack_segment_id,
+		const gaspi_notification_id_t ack_notification_begin,
+		const gaspi_number_t ack_notification_num,
+		gaspi_notification_t ack_notification_values[],
+		const gaspi_segment_id_t segment_id_local,
+		const gaspi_offset_t offset_local,
+		const gaspi_rank_t rank,
+		const gaspi_segment_id_t segment_id_remote,
+		const gaspi_offset_t offset_remote,
+		const gaspi_size_t size,
+		const gaspi_queue_id_t queue);
+
+gaspi_return_t
+tagaspi_ack_notify(const gaspi_segment_id_t ack_segment_id,
+		const gaspi_notification_id_t ack_notification_begin,
+		const gaspi_number_t ack_notification_num,
+		gaspi_notification_t ack_notification_values[],
+		const gaspi_segment_id_t segment_id_remote,
+		const gaspi_rank_t rank,
+		const gaspi_notification_id_t notification_id,
+		const gaspi_notification_t notification_value,
+		const gaspi_queue_id_t queue);
+
+gaspi_return_t
+tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
+		const gaspi_notification_id_t ack_notification_begin,
+		const gaspi_number_t ack_notification_num,
+		gaspi_notification_t ack_notification_values[],
+		const gaspi_segment_id_t segment_id_local,
+		const gaspi_offset_t offset_local,
+		const gaspi_rank_t rank,
+		const gaspi_segment_id_t segment_id_remote,
+		const gaspi_offset_t offset_remote,
+		const gaspi_size_t size,
+		const gaspi_notification_id_t notification_id,
+		const gaspi_notification_t notification_value,
+		const gaspi_queue_id_t queue);
+
+gaspi_return_t
 tagaspi_queue_group_create(const gaspi_queue_group_id_t queue_group,
 		const gaspi_queue_id_t queue_begin,
 		const gaspi_number_t queue_num,
