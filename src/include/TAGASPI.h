@@ -117,7 +117,7 @@ tagaspi_write_list_notify(const gaspi_number_t num,
 		const gaspi_timeout_t timeout_ms);
 
 gaspi_return_t
-tagaspi_notify_async_waitall_reset(const gaspi_segment_id_t segment_id_local,
+tagaspi_notify_async_waitall(const gaspi_segment_id_t segment_id_local,
 		const gaspi_notification_id_t notification_begin,
 		const gaspi_number_t num,
 		gaspi_notification_t old_notification_values[]);

@@ -25,20 +25,20 @@ LIBS=
 include_HEADERS= src/include/TAGASPI.h
 pkginclude_HEADERS= # This library does not provide any additional header
 
-c_api_sources=               \
- src/c/Initialization.cpp    \
- src/c/Write.cpp             \
- src/c/Read.cpp              \
- src/c/Notify.cpp            \
- src/c/WriteNotify.cpp       \
- src/c/WriteList.cpp         \
- src/c/ReadList.cpp          \
- src/c/WriteListNotify.cpp   \
- src/c/AckWrite.cpp          \
- src/c/AckRead.cpp           \
- src/c/AckNotify.cpp         \
- src/c/AckWriteNotify.cpp    \
- src/c/AsyncWaitallReset.cpp \
+c_api_sources=             \
+ src/c/Initialization.cpp  \
+ src/c/Write.cpp           \
+ src/c/Read.cpp            \
+ src/c/Notify.cpp          \
+ src/c/WriteNotify.cpp     \
+ src/c/WriteList.cpp       \
+ src/c/ReadList.cpp        \
+ src/c/WriteListNotify.cpp \
+ src/c/AckWrite.cpp        \
+ src/c/AckRead.cpp         \
+ src/c/AckNotify.cpp       \
+ src/c/AckWriteNotify.cpp  \
+ src/c/AsyncWaitall.cpp    \
  src/c/QueueGroups.cpp
 
 fortran_api_sources=

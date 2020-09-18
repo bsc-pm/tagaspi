@@ -134,17 +134,17 @@ module TAGASPI
       end function tagaspi_notify
     end interface
 
-    interface ! tagaspi_notify_async_waitall_reset
-      function tagaspi_notify_async_waitall_reset(segment_id_local,notification_begin, &
+    interface ! tagaspi_notify_async_waitall
+      function tagaspi_notify_async_waitall(segment_id_local,notification_begin, &
 &         num,old_notification_val) &
-&         result( res ) bind(C, name="tagaspi_notify_async_waitall_reset")
+&         result( res ) bind(C, name="tagaspi_notify_async_waitall")
     import
     integer(gaspi_segment_id_t), value :: segment_id_local
     integer(gaspi_notification_id_t), value :: notification_begin
     integer(gaspi_number_t), value :: num
     integer(gaspi_notification_t) :: old_notification_val
     integer(gaspi_return_t) :: res
-      end function tagaspi_notify_async_waitall_reset
+      end function tagaspi_notify_async_waitall
     end interface
 
     interface ! tagaspi_write_notify
