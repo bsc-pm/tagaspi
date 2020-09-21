@@ -90,7 +90,7 @@ module TAGASPI
     import
     integer(gaspi_number_t), value :: num
     type(c_ptr), value :: segment_id_local
-    type(c_ptr), value  :: offset_local
+    type(c_ptr), value :: offset_local
     integer(gaspi_rank_t), value :: rank
     type(c_ptr), value :: segment_id_remote
     type(c_ptr), value :: offset_remote
@@ -142,7 +142,7 @@ module TAGASPI
     integer(gaspi_segment_id_t), value :: segment_id_local
     integer(gaspi_notification_id_t), value :: notification_begin
     integer(gaspi_number_t), value :: num
-    integer(gaspi_notification_t) :: old_notification_val
+    type(c_ptr), value :: old_notification_val
     integer(gaspi_return_t) :: res
       end function tagaspi_notify_async_waitall
     end interface
@@ -201,7 +201,7 @@ module TAGASPI
     integer(gaspi_segment_id_t), value :: ack_segment_id
     integer(gaspi_notification_id_t), value :: ack_notification_begin
     integer(gaspi_number_t), value :: ack_notification_num
-    integer(gaspi_notification_t) :: ack_notification_values
+    type(c_ptr), value :: ack_notification_values
     integer(gaspi_segment_id_t), value :: segment_id_local
     integer(gaspi_offset_t), value :: offset_local
     integer(gaspi_rank_t), value :: rank
@@ -224,7 +224,7 @@ module TAGASPI
     integer(gaspi_segment_id_t), value :: ack_segment_id
     integer(gaspi_notification_id_t), value :: ack_notification_begin
     integer(gaspi_number_t), value :: ack_notification_num
-    integer(gaspi_notification_t) :: ack_notification_values
+    type(c_ptr), value :: ack_notification_values
     integer(gaspi_segment_id_t), value :: segment_id_remote
     integer(gaspi_rank_t), value :: rank
     integer(gaspi_notification_id_t), value :: notification_id
@@ -246,7 +246,7 @@ module TAGASPI
     integer(gaspi_segment_id_t), value :: ack_segment_id
     integer(gaspi_notification_id_t), value :: ack_notification_begin
     integer(gaspi_number_t), value :: ack_notification_num
-    integer(gaspi_notification_t) :: ack_notification_values
+    type(c_ptr), value :: ack_notification_values
     integer(gaspi_segment_id_t), value :: segment_id_local
     integer(gaspi_offset_t), value :: offset_local
     integer(gaspi_rank_t), value :: rank
@@ -274,7 +274,7 @@ module TAGASPI
 
     interface ! tagaspi_queue_group_delete
       function tagaspi_queue_group_delete(queue_group) &
-&         result( res ) bind(C, name="tagaspi_queue_delete")
+&         result( res ) bind(C, name="tagaspi_queue_group_delete")
     import
     integer(gaspi_queue_group_id_t), value :: queue_group
     integer(gaspi_return_t) :: res
