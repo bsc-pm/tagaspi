@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -23,8 +23,7 @@ tagaspi_read(const gaspi_segment_id_t segment_id_local,
 		const gaspi_segment_id_t segment_id_remote,
 		const gaspi_offset_t offset_remote,
 		const gaspi_size_t size,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms)
+		const gaspi_queue_id_t queue)
 {
 	assert(_env.enabled);
 	gaspi_return_t eret;
@@ -44,7 +43,8 @@ tagaspi_read(const gaspi_segment_id_t segment_id_local,
 	eret = gaspi_operation_submit(GASPI_OP_READ, tag,
 				segment_id_local, offset_local, rank,
 				segment_id_remote, offset_remote, size,
-				0, 0, queue, timeout_ms);
+				0, 0, queue, GASPI_BLOCK);
+	assert(eret != GASPI_TIMEOUT);
 
 	if (eret != GASPI_SUCCESS) {
 		TaskingModel::decreaseTaskEventCounter(counter, numRequests);

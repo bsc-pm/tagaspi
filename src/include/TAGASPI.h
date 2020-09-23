@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef TAGASPI_H
@@ -47,8 +47,7 @@ tagaspi_write(const gaspi_segment_id_t segment_id_local,
 		const gaspi_segment_id_t segment_id_remote,
 		const gaspi_offset_t offset_remote,
 		const gaspi_size_t size,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms);
+		const gaspi_queue_id_t queue);
 
 gaspi_return_t
 tagaspi_read(const gaspi_segment_id_t segment_id_local,
@@ -57,8 +56,7 @@ tagaspi_read(const gaspi_segment_id_t segment_id_local,
 		const gaspi_segment_id_t segment_id_remote,
 		const gaspi_offset_t offset_remote,
 		const gaspi_size_t size,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms);
+		const gaspi_queue_id_t queue);
 
 gaspi_return_t
 tagaspi_write_list(const gaspi_number_t num,
@@ -68,8 +66,7 @@ tagaspi_write_list(const gaspi_number_t num,
 		gaspi_segment_id_t * const segment_id_remote,
 		gaspi_offset_t * const offset_remote,
 		gaspi_size_t * const size,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms);
+		const gaspi_queue_id_t queue);
 
 gaspi_return_t
 tagaspi_read_list(const gaspi_number_t num,
@@ -79,16 +76,14 @@ tagaspi_read_list(const gaspi_number_t num,
 		gaspi_segment_id_t * const segment_id_remote,
 		gaspi_offset_t * const offset_remote,
 		gaspi_size_t * const size,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms);
+		const gaspi_queue_id_t queue);
 
 gaspi_return_t
 tagaspi_notify(const gaspi_segment_id_t segment_id_remote,
 		const gaspi_rank_t rank,
 		const gaspi_notification_id_t notification_id,
 		const gaspi_notification_t notification_value,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms);
+		const gaspi_queue_id_t queue);
 
 gaspi_return_t
 tagaspi_write_notify(const gaspi_segment_id_t segment_id_local,
@@ -99,8 +94,7 @@ tagaspi_write_notify(const gaspi_segment_id_t segment_id_local,
 		const gaspi_size_t size,
 		const gaspi_notification_id_t notification_id,
 		const gaspi_notification_t notification_value,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms);
+		const gaspi_queue_id_t queue);
 
 gaspi_return_t
 tagaspi_write_list_notify(const gaspi_number_t num,
@@ -113,8 +107,12 @@ tagaspi_write_list_notify(const gaspi_number_t num,
 		const gaspi_segment_id_t segment_id_notification,
 		const gaspi_notification_id_t notification_id,
 		const gaspi_notification_t notification_value,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms);
+		const gaspi_queue_id_t queue);
+
+gaspi_return_t
+tagaspi_notify_async_wait(const gaspi_segment_id_t segment_id_local,
+		const gaspi_notification_id_t notification_id,
+		gaspi_notification_t *old_notification_value);
 
 gaspi_return_t
 tagaspi_notify_async_waitall(const gaspi_segment_id_t segment_id_local,
@@ -124,9 +122,8 @@ tagaspi_notify_async_waitall(const gaspi_segment_id_t segment_id_local,
 
 gaspi_return_t
 tagaspi_ack_write(const gaspi_segment_id_t ack_segment_id,
-		const gaspi_notification_id_t ack_notification_begin,
-		const gaspi_number_t ack_notification_num,
-		gaspi_notification_t ack_notification_values[],
+		const gaspi_notification_id_t ack_notification_id,
+		gaspi_notification_t *ack_notification_value,
 		const gaspi_segment_id_t segment_id_local,
 		const gaspi_offset_t offset_local,
 		const gaspi_rank_t rank,
@@ -137,9 +134,8 @@ tagaspi_ack_write(const gaspi_segment_id_t ack_segment_id,
 
 gaspi_return_t
 tagaspi_ack_read(const gaspi_segment_id_t ack_segment_id,
-		const gaspi_notification_id_t ack_notification_begin,
-		const gaspi_number_t ack_notification_num,
-		gaspi_notification_t ack_notification_values[],
+		const gaspi_notification_id_t ack_notification_id,
+		gaspi_notification_t *ack_notification_value,
 		const gaspi_segment_id_t segment_id_local,
 		const gaspi_offset_t offset_local,
 		const gaspi_rank_t rank,
@@ -150,9 +146,8 @@ tagaspi_ack_read(const gaspi_segment_id_t ack_segment_id,
 
 gaspi_return_t
 tagaspi_ack_notify(const gaspi_segment_id_t ack_segment_id,
-		const gaspi_notification_id_t ack_notification_begin,
-		const gaspi_number_t ack_notification_num,
-		gaspi_notification_t ack_notification_values[],
+		const gaspi_notification_id_t ack_notification_id,
+		gaspi_notification_t *ack_notification_value,
 		const gaspi_segment_id_t segment_id_remote,
 		const gaspi_rank_t rank,
 		const gaspi_notification_id_t notification_id,
@@ -161,9 +156,8 @@ tagaspi_ack_notify(const gaspi_segment_id_t ack_segment_id,
 
 gaspi_return_t
 tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
-		const gaspi_notification_id_t ack_notification_begin,
-		const gaspi_number_t ack_notification_num,
-		gaspi_notification_t ack_notification_values[],
+		const gaspi_notification_id_t ack_notification_id,
+		gaspi_notification_t *ack_notification_value,
 		const gaspi_segment_id_t segment_id_local,
 		const gaspi_offset_t offset_local,
 		const gaspi_rank_t rank,

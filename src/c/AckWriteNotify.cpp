@@ -36,9 +36,8 @@ static void triggerWriteNotify(const AckWaitingRange &waitingRange)
 
 gaspi_return_t
 tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
-		const gaspi_notification_id_t ack_notification_begin,
-		const gaspi_number_t ack_notification_num,
-		gaspi_notification_t ack_notification_values[],
+		const gaspi_notification_id_t ack_notification_id,
+		gaspi_notification_t *ack_notification_value,
 		const gaspi_segment_id_t segment_id_local,
 		const gaspi_offset_t offset_local,
 		const gaspi_rank_t rank,
@@ -52,9 +51,6 @@ tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
 	assert(_env.enabled);
 	assert(ack_segment_id < _env.maxSegments);
 
-	if (ack_notification_num == 0)
-		return GASPI_SUCCESS;
-
 	gaspi_number_t numRequests = 0;
 	gaspi_return_t eret = gaspi_operation_get_num_requests(GASPI_OP_WRITE_NOTIFY, 0, &numRequests);
 	assert(eret == GASPI_SUCCESS);
@@ -65,9 +61,8 @@ tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
 
 	TaskingModel::increaseCurrentTaskEventCounter(counter, numRequests);
 
-	gaspi_number_t remaining = WaitingRange::checkNotifications(
-		ack_segment_id, ack_notification_begin, ack_notification_num,
-		ack_notification_values, ack_notification_num);
+	gaspi_number_t remaining = WaitingRange::checkNotification(
+		ack_segment_id, ack_notification_id, ack_notification_value);
 
 	if (remaining == 0) {
 		gaspi_tag_t tag = (gaspi_tag_t) counter;
@@ -87,9 +82,8 @@ tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
 
 	AckWaitingRange *waitingRange =
 		Allocator<AckWaitingRange>::allocate(
-			ack_segment_id, ack_notification_begin,
-			ack_notification_num, ack_notification_values,
-			remaining, counter);
+			ack_segment_id, ack_notification_id,
+			1, ack_notification_value, 1, counter);
 	assert(waitingRange != nullptr);
 
 	waitingRange->setAckActionCallback(triggerWriteNotify);

@@ -56,11 +56,46 @@ public:
 
 	inline bool checkNotifications()
 	{
-		_remaining = WaitingRange::checkNotifications(
-			_segment, _firstId, _numIds,
-			_notifiedValues, _remaining);
-
+		if (_numIds == 1) {
+			_remaining = checkNotification(_segment, _firstId, _notifiedValues);
+		} else {
+			_remaining = WaitingRange::checkNotifications(
+				_segment, _firstId, _numIds, _notifiedValues,
+				_remaining);
+		}
 		return (_remaining == 0);
+	}
+
+	static inline gaspi_number_t checkNotification(
+		gaspi_segment_id_t segment,
+		gaspi_notification_id_t notificationId,
+		gaspi_notification_t *notifiedValue
+	) {
+		gaspi_notification_id_t id;
+		gaspi_notification_t value;
+		gaspi_return_t eret;
+
+		eret = gaspi_notify_waitsome(segment, notificationId, 1, &id, GASPI_TEST);
+		if (eret == GASPI_SUCCESS) {
+			assert(id == notificationId);
+
+			eret = gaspi_notify_reset(segment, notificationId, &value);
+			if (eret != GASPI_SUCCESS) {
+				fprintf(stderr, "Error: Return code %d from gaspi_notify_reset\n", eret);
+				abort();
+			}
+
+			if (value != 0) {
+				if (notifiedValue != GASPI_NOTIFICATION_IGNORE)
+					*notifiedValue = value;
+
+				return 0;
+			}
+		} else if (eret != GASPI_TIMEOUT) {
+			fprintf(stderr, "Error: Return code %d from gaspi_notify_waitsome\n", eret);
+			abort();
+		}
+		return 1;
 	}
 
 	static inline gaspi_number_t checkNotifications(
@@ -82,11 +117,6 @@ public:
 			cont = false;
 
 			eret = gaspi_notify_waitsome(segment, firstId, numIds, &notifiedId, GASPI_TEST);
-			if (eret != GASPI_SUCCESS && eret != GASPI_TIMEOUT) {
-				fprintf(stderr, "Error: Return code %d from gaspi_notify_waitsome\n", eret);
-				abort();
-			}
-
 			if (eret == GASPI_SUCCESS) {
 				assert(notifiedId >= firstId && notifiedId < firstId + numIds);
 
@@ -97,13 +127,15 @@ public:
 				}
 
 				if (notifiedValue != 0) {
-					if (notifiedValues != GASPI_NOTIFICATION_IGNORE) {
+					if (notifiedValues != GASPI_NOTIFICATION_IGNORE)
 						notifiedValues[notifiedId - firstId] = notifiedValue;
-					}
-					cont = true;
 
+					cont = true;
 					--remaining;
 				}
+			} else if (eret != GASPI_TIMEOUT) {
+				fprintf(stderr, "Error: Return code %d from gaspi_notify_waitsome\n", eret);
+				abort();
 			}
 		} while (cont && remaining > 0);
 

@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2019 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -21,8 +21,7 @@ tagaspi_notify(const gaspi_segment_id_t segment_id_remote,
 		const gaspi_rank_t rank,
 		const gaspi_notification_id_t notification_id,
 		const gaspi_notification_t notification_value,
-		const gaspi_queue_id_t queue,
-		const gaspi_timeout_t timeout_ms)
+		const gaspi_queue_id_t queue)
 {
 	assert(_env.enabled);
 	gaspi_return_t eret;
@@ -42,7 +41,8 @@ tagaspi_notify(const gaspi_segment_id_t segment_id_remote,
 	eret = gaspi_operation_submit(GASPI_OP_NOTIFY, tag,
 				0, 0, rank, segment_id_remote, 0, 0,
 				notification_id, notification_value,
-				queue, timeout_ms);
+				queue, GASPI_BLOCK);
+	assert(eret != GASPI_TIMEOUT);
 
 	if (eret != GASPI_SUCCESS) {
 		TaskingModel::decreaseTaskEventCounter(counter, numRequests);

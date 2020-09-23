@@ -38,7 +38,7 @@ c_api_sources=             \
  src/c/AckRead.cpp         \
  src/c/AckNotify.cpp       \
  src/c/AckWriteNotify.cpp  \
- src/c/AsyncWaitall.cpp    \
+ src/c/NotifyAsyncWait.cpp \
  src/c/QueueGroups.cpp
 
 fortran_api_sources=
