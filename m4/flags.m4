@@ -87,11 +87,11 @@ AC_DEFUN([AX_COMPILE_FLAGS], [
 	AS_IF([test "$enable_debug_mode" = yes],[
 		# Debug mode is enabled
 		tagaspi_CPPFLAGS=""
-		tagaspi_CXXFLAGS="-O0 -g3 -Wall -Wextra"
+		tagaspi_CXXFLAGS="-Wall -Wextra -Wshadow -fvisibility=hidden -O0 -g3"
 	],[
-		# Debug mode is enabled
+		# Debug mode is disabled
 		tagaspi_CPPFLAGS="-DNDEBUG"
-		tagaspi_CXXFLAGS="-O3 -fno-rtti -fno-exceptions -fvisibility-inlines-hidden -Wall -Wextra"
+		tagaspi_CXXFLAGS="-Wall -Wextra -Wshadow -fvisibility=hidden -O3"
 	])
 
 	AC_SUBST(tagaspi_CPPFLAGS)
