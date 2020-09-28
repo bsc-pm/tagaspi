@@ -140,7 +140,7 @@ private:
 			assert(numAssigned < numNUMAs);
 
 			/* Assign the last queue to the rest of NUMAs */
-			for (size_t numa = remainingQueues - 1; numa < maxNUMAs; ++numa) {
+			for (numa = remainingQueues - 1; numa < maxNUMAs; ++numa) {
 				if (numaAvailability[numa]) {
 					numaQueues[numa].first = (queue_id_t) (remainingQueues - 1);
 					numaQueues[numa].num = 1;
