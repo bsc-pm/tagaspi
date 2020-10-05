@@ -115,6 +115,12 @@ tagaspi_notify_async_wait(const gaspi_segment_id_t segment_id_local,
 		gaspi_notification_t *old_notification_value);
 
 gaspi_return_t
+tagaspi_notify_async_wait_callback(const gaspi_segment_id_t segment_id_local,
+		const gaspi_notification_id_t notification_id,
+		void (*callback)(gaspi_notification_t notification_value, void *args),
+		void *callback_args);
+
+gaspi_return_t
 tagaspi_notify_async_waitall(const gaspi_segment_id_t segment_id_local,
 		const gaspi_notification_id_t notification_begin,
 		const gaspi_number_t num,
@@ -158,6 +164,21 @@ gaspi_return_t
 tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
 		const gaspi_notification_id_t ack_notification_id,
 		gaspi_notification_t *ack_notification_value,
+		const gaspi_segment_id_t segment_id_local,
+		const gaspi_offset_t offset_local,
+		const gaspi_rank_t rank,
+		const gaspi_segment_id_t segment_id_remote,
+		const gaspi_offset_t offset_remote,
+		const gaspi_size_t size,
+		const gaspi_notification_id_t notification_id,
+		const gaspi_notification_t notification_value,
+		const gaspi_queue_id_t queue);
+
+gaspi_return_t
+tagaspi_ackall_write_notify(const gaspi_segment_id_t ack_segment_id,
+		const gaspi_notification_id_t ack_notification_id,
+		const gaspi_number_t ack_notification_num,
+		gaspi_notification_t ack_notification_values[],
 		const gaspi_segment_id_t segment_id_local,
 		const gaspi_offset_t offset_local,
 		const gaspi_rank_t rank,

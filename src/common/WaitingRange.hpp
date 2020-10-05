@@ -16,11 +16,12 @@
 #include <cstdio>
 
 class WaitingRange {
-private:
+protected:
 	gaspi_segment_id_t _segment;
 	gaspi_notification_id_t _firstId;
 	gaspi_number_t _numIds;
 	gaspi_notification_t *_notifiedValues;
+	gaspi_notification_t _notifiedValue;
 
 	gaspi_number_t _remaining;
 
@@ -57,7 +58,9 @@ public:
 	inline bool checkNotifications()
 	{
 		if (_numIds == 1) {
-			_remaining = checkNotification(_segment, _firstId, _notifiedValues);
+			_remaining = checkNotification(_segment, _firstId, &_notifiedValue);
+			if (_notifiedValues != GASPI_NOTIFICATION_IGNORE)
+				*_notifiedValues = _notifiedValue;
 		} else {
 			_remaining = WaitingRange::checkNotifications(
 				_segment, _firstId, _numIds, _notifiedValues,
@@ -155,9 +158,9 @@ public:
 
 class AckWaitingRange : public WaitingRange {
 public:
-	typedef void (*callback_t)(const AckWaitingRange &waitingRange);
+	typedef void (*callback_t)(gaspi_notification_t notifiedValue, void *args);
 
-	struct AckActionArgs {
+	struct AckActionInfo {
 		gaspi_segment_id_t segment_id_local;
 		gaspi_offset_t offset_local;
 		gaspi_rank_t rank;
@@ -172,9 +175,15 @@ public:
 private:
 	callback_t _ackActionCallback;
 
-	AckActionArgs _ackActionArgs;
+	void *_ackActionArgs;
+
+	AckActionInfo _ackActionInfo;
+
+	bool _unregister;
 
 public:
+	static __thread AckWaitingRange *_currentWaitingRange;
+
 	inline AckWaitingRange(
 		gaspi_segment_id_t segment,
 		gaspi_notification_id_t firstNotificationId,
@@ -187,7 +196,9 @@ public:
 			numNotifications, notifiedValues,
 			remainingNotifications, eventCounter),
 		_ackActionCallback(nullptr),
-		_ackActionArgs()
+		_ackActionArgs(nullptr),
+		_ackActionInfo(),
+		_unregister(false)
 	{
 	}
 
@@ -196,21 +207,42 @@ public:
 		_ackActionCallback = callback;
 	}
 
-	inline AckActionArgs &getAckActionArgs()
+	inline void setAckActionArgs(void *args)
+	{
+		_ackActionArgs = args;
+	}
+
+	inline void *getAckActionArgs() const
 	{
 		return _ackActionArgs;
 	}
 
-	inline const AckActionArgs &getAckActionArgs() const
+	inline AckActionInfo &getAckActionInfo()
 	{
-		return _ackActionArgs;
+		return _ackActionInfo;
+	}
+
+	inline const AckActionInfo &getAckActionInfo() const
+	{
+		return _ackActionInfo;
+	}
+
+	inline void setUnregister()
+	{
+		_unregister = true;
 	}
 
 	inline void complete() override
 	{
 		assert(_ackActionCallback != nullptr);
+		assert(_currentWaitingRange == nullptr);
 
-		_ackActionCallback(*this);
+		_currentWaitingRange = this;
+		_ackActionCallback(_notifiedValue, _ackActionArgs);
+		_currentWaitingRange = nullptr;
+
+		if (_unregister)
+			WaitingRange::complete();
 	}
 
 	inline bool isAckWaitingRange() const override

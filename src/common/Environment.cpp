@@ -24,6 +24,7 @@ Environment _env;
 std::vector<int> HardwareInfo::_cpuToNUMANode;
 std::vector<bool> HardwareInfo::_numaNodeAvailability;
 size_t HardwareInfo::_numAvailableNUMANodes;
+__thread AckWaitingRange *AckWaitingRange::_currentWaitingRange;
 
 
 void Environment::initialize()

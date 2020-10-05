@@ -15,18 +15,21 @@
 #include <cstdio>
 
 
-static void triggerRead(const AckWaitingRange &waitingRange)
+static void triggerRead(gaspi_notification_t, void *args)
 {
-	gaspi_tag_t tag = (gaspi_tag_t) waitingRange.getEventCounter();
+	AckWaitingRange *waitingRange = (AckWaitingRange *) args;
+	assert(waitingRange != nullptr);
 
-	const AckWaitingRange::AckActionArgs &args = waitingRange.getAckActionArgs();
+	gaspi_tag_t tag = (gaspi_tag_t) waitingRange->getEventCounter();
+
+	const AckWaitingRange::AckActionInfo &info = waitingRange->getAckActionInfo();
 
 	gaspi_return_t eret = gaspi_operation_submit(
 		GASPI_OP_READ, tag,
-		args.segment_id_local, args.offset_local,
-		args.rank, args.segment_id_remote,
-		args.offset_remote, args.size,
-		0, 0, args.queue, GASPI_BLOCK);
+		info.segment_id_local, info.offset_local,
+		info.rank, info.segment_id_remote,
+		info.offset_remote, info.size,
+		0, 0, info.queue, GASPI_BLOCK);
 
 	if (eret != GASPI_SUCCESS) {
 		fprintf(stderr, "Error: Return code %d from gaspi_operation_submit\n", eret);
@@ -85,15 +88,16 @@ tagaspi_ack_read(const gaspi_segment_id_t ack_segment_id,
 	assert(waitingRange != nullptr);
 
 	waitingRange->setAckActionCallback(triggerRead);
+	waitingRange->setAckActionArgs(waitingRange);
 
-	AckWaitingRange::AckActionArgs &args = waitingRange->getAckActionArgs();
-	args.segment_id_local = segment_id_local;
-	args.offset_local = offset_local;
-	args.rank = rank;
-	args.segment_id_remote = segment_id_remote;
-	args.offset_remote = offset_remote;
-	args.size = size;
-	args.queue = queue;
+	AckWaitingRange::AckActionInfo &info = waitingRange->getAckActionInfo();
+	info.segment_id_local = segment_id_local;
+	info.offset_local = offset_local;
+	info.rank = rank;
+	info.segment_id_remote = segment_id_remote;
+	info.offset_remote = offset_remote;
+	info.size = size;
+	info.queue = queue;
 
 	_env.waitingRangeQueues[ack_segment_id].enqueue(waitingRange);
 
