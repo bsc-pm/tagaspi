@@ -20,56 +20,71 @@
 #include <cassert>
 
 
+EnvironmentVariable<uint64_t> Polling::_queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 4);
 EnvironmentVariable<uint64_t> Polling::_pollingFrequency("TAGASPI_POLLING_FREQUENCY", 500);
-TaskingModel::polling_handle_t *Polling::_queuesPollingHandles;
+Polling::QueuePollingInfo *Polling::_queuePollingInfos;
 TaskingModel::polling_handle_t Polling::_notificationsPollingHandle;
-
 
 void Polling::initialize()
 {
 	assert(_env.maxQueues > 0);
+	assert(_queuePollingInstances > 0);
 
-	const gaspi_number_t numQueuePollingHandles = 1 + ((_env.maxQueues - 1) / QPPI);
+	_queuePollingInfos = new QueuePollingInfo[_queuePollingInstances];
+	assert(_queuePollingInfos != nullptr);
 
-	_queuesPollingHandles = new TaskingModel::polling_handle_t[numQueuePollingHandles];
-	assert(_queuesPollingHandles != nullptr);
+	gaspi_number_t qppi = _env.maxQueues / _queuePollingInstances;
+	gaspi_number_t remq = _env.maxQueues % _queuePollingInstances;
 
-	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPI) {
-		_queuesPollingHandles[q / QPPI] = TaskingModel::registerPolling(
-			"TAGASPI QUEUES",
-			pollQueues, (void *)(uintptr_t) q,
-			_pollingFrequency
-		);
+	gaspi_queue_id_t queue = 0;
+	for (gaspi_number_t ins = 0; ins < _queuePollingInstances; ++ins) {
+		QueuePollingInfo *info = &_queuePollingInfos[ins];
+
+		info->numQueues = qppi + (ins < remq);
+		if (info->numQueues > 0) {
+			info->firstQueue = queue;
+			info->pollingHandle = TaskingModel::registerPolling(
+				"TAGASPI QUEUES", pollQueues, info,
+				_pollingFrequency
+			);
+			queue += info->numQueues;
+		}
 	}
 
 	_notificationsPollingHandle = TaskingModel::registerPolling(
-		"TAGASPI NOTIFICATIONS",
-		pollNotifications, nullptr,
+		"TAGASPI NOTIFICATIONS", pollNotifications, nullptr,
 		_pollingFrequency
 	);
 }
 
 void Polling::finalize()
 {
-	for (gaspi_number_t q = 0; q < _env.maxQueues; q += QPPI) {
-		TaskingModel::unregisterPolling(_queuesPollingHandles[q / QPPI]);
+	for (gaspi_number_t ins = 0; ins < _queuePollingInstances; ++ins) {
+		if (_queuePollingInfos[ins].numQueues) {
+			TaskingModel::unregisterPolling(_queuePollingInfos[ins].pollingHandle);
+		}
 	}
 	TaskingModel::unregisterPolling(_notificationsPollingHandle);
 
-	delete [] _queuesPollingHandles;
+	delete [] _queuePollingInfos;
 }
 
 void Polling::pollQueues(void *data)
 {
-	gaspi_queue_id_t queue = (uintptr_t) data;
-	assert(queue < _env.maxQueues);
+	QueuePollingInfo *info = (QueuePollingInfo *) data;
+	assert(info != nullptr);
 
-	gaspi_number_t completedReqs, numQueues, r;
+	gaspi_queue_id_t queue = info->firstQueue;
+	gaspi_number_t numQueues = queue + info->numQueues;
+
+	assert(numQueues > 0);
+	assert(queue < _env.maxQueues);
+	assert(numQueues <= _env.maxQueues);
+
+	gaspi_number_t completedReqs, r;
 	gaspi_status_t statuses[NREQ];
 	gaspi_tag_t tags[NREQ];
 	gaspi_return_t eret;
-
-	numQueues = std::min(queue + QPPI, _env.maxQueues);
 
 	for (; queue < numQueues; ++queue) {
 		SpinLock &mutex = _env.queuePollingLocks[queue];

@@ -18,11 +18,19 @@
 
 class Polling {
 private:
+	struct QueuePollingInfo {
+		gaspi_queue_id_t firstQueue;
+		gaspi_number_t numQueues;
+		TaskingModel::polling_handle_t pollingHandle;
+	};
+
 	//! Number of requests checked per gaspi_request_wait call
 	static const unsigned int NREQ = 64;
 
-	//! Number of queues per polling instance
-	static const unsigned int QPPI = 4;
+	//! Number of polling instances to check queues' completion. This
+	//! environment variable is called TAGASPI_QUEUE_CHECKERS and the
+	//! default value is 4
+	static EnvironmentVariable<uint64_t> _queuePollingInstances;
 
 	//! Determine the polling frequency when the TAGASPI polling is
 	//! implemented with tasks that are paused periodically. That is
@@ -34,9 +42,8 @@ private:
 	//! NANOS6_POLLING_FREQUENCY should be used for OmpSs-2
 	static EnvironmentVariable<uint64_t> _pollingFrequency;
 
-	//! The handle to the polling instance that periodically checks
-	//! the queues of GASPI requests in TAGASPI
-	static TaskingModel::polling_handle_t *_queuesPollingHandles;
+	//! The information for each GASPI queues polling instance
+	static QueuePollingInfo *_queuePollingInfos;
 
 	//! The handle to the polling instance that periodically checks
 	//! the GASPI notifications in TAGASPI
