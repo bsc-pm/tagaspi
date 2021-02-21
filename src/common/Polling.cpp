@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <string>
 
 
 EnvironmentVariable<uint64_t> Polling::_queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 4);
@@ -43,8 +44,10 @@ void Polling::initialize()
 		info->numQueues = qppi + (ins < remq);
 		if (info->numQueues > 0) {
 			info->firstQueue = queue;
+
+			std::string name = std::string("TAGASPI QUEUES ") + std::to_string(ins);
 			info->pollingHandle = TaskingModel::registerPolling(
-				"TAGASPI QUEUES", pollQueues, info,
+				name.c_str(), pollQueues, info,
 				_pollingFrequency
 			);
 			queue += info->numQueues;
@@ -108,15 +111,17 @@ void Polling::pollQueues(void *data)
 			assert(completedReqs <= NREQ);
 
 			for (r = 0; r < completedReqs; ++r) {
-				void *eventCounter = (void *) tags[r];
-				assert(eventCounter != nullptr);
-
 				if (statuses[r].error != GASPI_SUCCESS) {
-					fprintf(stderr, "Error: TAGASPI operation with tag %lld failed\n", (gaspi_tag_t) eventCounter);
+					fprintf(stderr, "Error: GASPI operation with tag %lld failed\n", tags[r]);
 					abort();
 				}
 
-				TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
+				if (tags[r] != GASPI_TAG_NULL) {
+					void *eventCounter = (void *) tags[r];
+					assert(eventCounter != nullptr);
+
+					TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
+				}
 			}
 		} while (completedReqs == NREQ);
 
