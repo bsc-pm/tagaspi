@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cassert>
 #include <string>
+#include <vector>
 
 
 EnvironmentVariable<uint64_t> Polling::_queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 4);
@@ -138,34 +139,28 @@ void Polling::pollNotifications(void *)
 		return;
 	}
 
-	std::list<WaitingRange*> completeRanges;
-	std::list<WaitingRange*> pendingRanges;
+	std::vector<WaitingRange*> completeRanges;
 
 	gaspi_segment_id_t seg;
-	bool repeat;
-
 	for (seg = 0; seg < _env.maxSegments; ++seg) {
 		WaitingRangeQueue &queue = _env.waitingRangeQueues[seg];
 		WaitingRangeList &list = _env.waitingRangeLists[seg];
 
-		do {
-			repeat = queue.dequeueSome(pendingRanges, completeRanges, 64);
-			list.checkNotifications(completeRanges);
-			list.splice(pendingRanges);
+		queue.dequeueAll(list);
+		list.checkNotifications(completeRanges);
 
-			for (WaitingRange *range : completeRanges) {
-				assert(range != nullptr);
+		for (WaitingRange *range : completeRanges) {
+			assert(range != nullptr);
 
-				range->complete();
+			range->complete();
 
-				if (range->isAckWaitingRange()) {
-					Allocator<AckWaitingRange>::free((AckWaitingRange *) range);
-				} else {
-					Allocator<WaitingRange>::free(range);
-				}
+			if (range->isAckWaitingRange()) {
+				Allocator<AckWaitingRange>::free((AckWaitingRange *) range);
+			} else {
+				Allocator<WaitingRange>::free(range);
 			}
-			completeRanges.clear();
-		} while (repeat);
+		}
+		completeRanges.clear();
 	}
 
 	mutex.unlock();

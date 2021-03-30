@@ -9,12 +9,18 @@
 
 #include "WaitingRange.hpp"
 
-#include <list>
+#include <boost/intrusive/list.hpp>
+
+#include <deque>
+#include <vector>
 
 
 class WaitingRangeList {
 private:
-	std::list<WaitingRange*> _list;
+	typedef boost::intrusive::member_hook<WaitingRange, typename WaitingRange::links_t, &WaitingRange::_listLinks> hook_option_t;
+	typedef boost::intrusive::list<WaitingRange, hook_option_t> list_t;
+
+	list_t _list;
 
 public:
 	inline WaitingRangeList() :
@@ -27,23 +33,19 @@ public:
 		assert(_list.empty());
 	}
 
-	inline void splice(std::list<WaitingRange*> &pendingRanges)
+	inline void add(WaitingRange *range)
 	{
-		if (!pendingRanges.empty()) {
-			_list.splice(_list.end(), pendingRanges);
-		}
-		assert(pendingRanges.empty());
+		_list.push_back(*range);
 	}
 
-	inline void checkNotifications(std::list<WaitingRange*> &completeRanges)
+	inline void checkNotifications(std::vector<WaitingRange*> &completeRanges)
 	{
 		auto it = _list.begin();
 		while (it != _list.end()) {
-			WaitingRange *wr = *it;
-			assert(wr != nullptr);
+			WaitingRange &wr = *it;
 
-			if (wr->checkNotifications()) {
-				completeRanges.push_back(wr);
+			if (wr.checkNotifications()) {
+				completeRanges.push_back(&wr);
 				it = _list.erase(it);
 				continue;
 			}

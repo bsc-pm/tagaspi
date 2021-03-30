@@ -38,11 +38,8 @@ tagaspi_write(const gaspi_segment_id_t segment_id_local,
 
 	gaspi_tag_t tag = (gaspi_tag_t) counter;
 
-	gaspi_number_t numRequests = 0;
-	eret = gaspi_operation_get_num_requests(GASPI_OP_WRITE, 0, &numRequests);
-	assert(eret == GASPI_SUCCESS);
-	assert(numRequests > 0);
-
+	// TODO: Use gaspi_operation_get_num_requests
+	gaspi_number_t numRequests = 1;
 	TaskingModel::increaseCurrentTaskEventCounter(counter, numRequests);
 
 	eret = gaspi_operation_submit(GASPI_OP_WRITE, tag,

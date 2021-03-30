@@ -54,10 +54,7 @@ tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
 	assert(_env.enabled);
 	assert(ack_segment_id < _env.maxSegments);
 
-	gaspi_number_t numRequests = 0;
-	gaspi_return_t eret = gaspi_operation_get_num_requests(GASPI_OP_WRITE_NOTIFY, 0, &numRequests);
-	assert(eret == GASPI_SUCCESS);
-	assert(numRequests > 0);
+	gaspi_number_t numRequests = 2;
 
 	void *counter = TaskingModel::getCurrentEventCounter();
 	assert(counter != NULL);
@@ -70,7 +67,7 @@ tagaspi_ack_write_notify(const gaspi_segment_id_t ack_segment_id,
 	if (remaining == 0) {
 		gaspi_tag_t tag = (gaspi_tag_t) counter;
 
-		eret = gaspi_operation_submit(GASPI_OP_WRITE_NOTIFY,
+		gaspi_return_t eret = gaspi_operation_submit(GASPI_OP_WRITE_NOTIFY,
 			tag, segment_id_local, offset_local, rank,
 			segment_id_remote, offset_remote, size,
 			notification_id, notification_value,

@@ -7,24 +7,32 @@
 #ifndef WAITING_RANGE_QUEUE_HPP
 #define WAITING_RANGE_QUEUE_HPP
 
+#include <boost/lockfree/spsc_queue.hpp>
+#include <boost/lockfree/queue.hpp>
+
 #include "WaitingRange.hpp"
-#include "util/MPSCLockFreeQueue.hpp"
+#include "WaitingRangeList.hpp"
+#include "util/SpinLock.hpp"
 #include "util/Utils.hpp"
 
 #ifndef WR_QUEUE_CAPACITY
-#define WR_QUEUE_CAPACITY (64*1024)
+#define WR_QUEUE_CAPACITY (63*1024)
 #endif
 
 
 class WaitingRangeQueue {
 private:
-	util::MPSCLockFreeQueue<WaitingRange*> _queue;
+	typedef boost::lockfree::spsc_queue<WaitingRange*, boost::lockfree::capacity<WR_QUEUE_CAPACITY> > add_queue_t;
+
+	add_queue_t _queue;
+
+	SpinLock _lock;
 
 public:
-	inline WaitingRangeQueue(int capacity = WR_QUEUE_CAPACITY) :
-		_queue(capacity)
+	inline WaitingRangeQueue() :
+		_queue(),
+		_lock()
 	{
-		assert(capacity > 0);
 	}
 
 	inline ~WaitingRangeQueue()
@@ -35,34 +43,24 @@ public:
 	inline void enqueue(WaitingRange *waitingRange)
 	{
 		assert(waitingRange != nullptr);
-		while (!_queue.enqueue(waitingRange)) {
+
+		_lock.lock();
+		while (!_queue.push(waitingRange)) {
 			util::spinWait();
 		}
+		_lock.unlock();
 	}
 
-	inline bool dequeueSome(std::list<WaitingRange*> &pendingRanges, std::list<WaitingRange*> &completeRanges, int maximum)
+	inline void dequeueAll(WaitingRangeList &pendingRanges)
 	{
-		assert(maximum > 0);
-
-		WaitingRange *range = nullptr;
-		int dequeued = 0;
-
-		do {
-			range = _queue.dequeue();
-			if (range != 0) {
-				if (range->checkNotifications()) {
-					completeRanges.push_back(range);
-				} else {
-					pendingRanges.push_back(range);
+		if (!_queue.empty()) {
+			_queue.consume_all(
+				[&](WaitingRange *range) {
+					assert(range != nullptr);
+					pendingRanges.add(range);
 				}
-				++dequeued;
-			}
-		} while (range != 0 && dequeued < maximum);
-
-		if (dequeued == maximum) {
-			return !_queue.empty();
+			);
 		}
-		return false;
 	}
 };
 

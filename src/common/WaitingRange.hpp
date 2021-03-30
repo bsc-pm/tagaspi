@@ -10,6 +10,8 @@
 #include <GASPI.h>
 #include <TAGASPI.h>
 
+#include <boost/intrusive/list.hpp>
+
 #include "TaskingModel.hpp"
 
 #include <cassert>
@@ -28,6 +30,11 @@ protected:
 	void *_eventCounter;
 
 public:
+	typedef boost::intrusive::link_mode<boost::intrusive::normal_link> link_mode_t;
+	typedef boost::intrusive::list_member_hook<link_mode_t> links_t;
+
+	links_t _listLinks;
+
 	inline WaitingRange(
 		gaspi_segment_id_t segment,
 		gaspi_notification_id_t firstNotificationId,
