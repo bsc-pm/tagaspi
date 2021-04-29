@@ -22,7 +22,7 @@
 #include <vector>
 
 
-EnvironmentVariable<uint64_t> Polling::_queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 4);
+EnvironmentVariable<uint64_t> Polling::_queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 1);
 EnvironmentVariable<uint64_t> Polling::_pollingFrequency("TAGASPI_POLLING_FREQUENCY", 500);
 Polling::QueuePollingInfo *Polling::_queuePollingInfos;
 TaskingModel::polling_handle_t Polling::_notificationsPollingHandle;
