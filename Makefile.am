@@ -34,10 +34,6 @@ c_api_sources=             \
  src/c/WriteList.cpp       \
  src/c/ReadList.cpp        \
  src/c/WriteListNotify.cpp \
- src/c/AckWrite.cpp        \
- src/c/AckRead.cpp         \
- src/c/AckNotify.cpp       \
- src/c/AckWriteNotify.cpp  \
  src/c/NotifyAsyncWait.cpp \
  src/c/QueueGroups.cpp
 

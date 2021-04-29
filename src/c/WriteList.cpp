@@ -29,12 +29,7 @@ tagaspi_write_list(const gaspi_number_t num,
 	assert(_env.enabled);
 	gaspi_return_t eret;
 
-	void *counter = NULL;
-	if (AckWaitingRange::_currentWaitingRange != nullptr) {
-		counter = AckWaitingRange::_currentWaitingRange->getEventCounter();
-	} else {
-		counter = TaskingModel::getCurrentEventCounter();
-	}
+	void *counter = TaskingModel::getCurrentEventCounter();
 	assert(counter != NULL);
 
 	gaspi_tag_t tag = (gaspi_tag_t) counter;

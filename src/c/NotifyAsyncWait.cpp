@@ -86,44 +86,6 @@ tagaspi_notify_async_waitall(const gaspi_segment_id_t segment_id,
 	return GASPI_SUCCESS;
 }
 
-gaspi_return_t
-tagaspi_notify_async_wait_callback(const gaspi_segment_id_t segment_id,
-		const gaspi_notification_id_t notification_id,
-		void (*callback)(gaspi_notification_t, void *),
-		void *callback_args)
-{
-	assert(_env.enabled);
-	assert(segment_id < _env.maxSegments);
-	assert(callback != nullptr);
-
-	gaspi_notification_t value;
-	gaspi_number_t remaining = WaitingRange::checkNotification(segment_id, notification_id, &value);
-
-	if (remaining == 0) {
-		callback(value, callback_args);
-		return GASPI_SUCCESS;
-	}
-
-	void *counter = TaskingModel::getCurrentEventCounter();
-	assert(counter != NULL);
-
-	TaskingModel::increaseCurrentTaskEventCounter(counter, 1);
-
-	AckWaitingRange *waitingRange =
-		Allocator<AckWaitingRange>::allocate(
-			segment_id, notification_id,
-			1, nullptr, 1, counter);
-	assert(waitingRange != nullptr);
-
-	waitingRange->setAckActionCallback(callback);
-	waitingRange->setAckActionArgs(callback_args);
-	waitingRange->setUnregister();
-
-	_env.waitingRangeQueues[segment_id].enqueue(waitingRange);
-
-	return GASPI_SUCCESS;
-}
-
 #ifdef __cplusplus
 }
 #endif

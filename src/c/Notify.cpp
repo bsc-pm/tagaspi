@@ -26,12 +26,7 @@ tagaspi_notify(const gaspi_segment_id_t segment_id_remote,
 	assert(_env.enabled);
 	gaspi_return_t eret;
 
-	void *counter = NULL;
-	if (AckWaitingRange::_currentWaitingRange != nullptr) {
-		counter = AckWaitingRange::_currentWaitingRange->getEventCounter();
-	} else {
-		counter = TaskingModel::getCurrentEventCounter();
-	}
+	void *counter = TaskingModel::getCurrentEventCounter();
 	assert(counter != NULL);
 
 	gaspi_tag_t tag = (gaspi_tag_t) counter;

@@ -154,11 +154,7 @@ void Polling::pollNotifications(void *)
 
 			range->complete();
 
-			if (range->isAckWaitingRange()) {
-				Allocator<AckWaitingRange>::free((AckWaitingRange *) range);
-			} else {
-				Allocator<WaitingRange>::free(range);
-			}
+			Allocator<WaitingRange>::free(range);
 		}
 		completeRanges.clear();
 	}
