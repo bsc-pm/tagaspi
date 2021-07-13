@@ -91,13 +91,6 @@ void Polling::pollQueues(void *data)
 	gaspi_return_t eret;
 
 	for (; queue < numQueues; ++queue) {
-		SpinLock &mutex = _env.queuePollingLocks[queue];
-		if (!mutex.trylock()) {
-			// This should not happen since polling services
-			// are called from a single thread at a time
-			continue;
-		}
-
 		do {
 			eret = gaspi_request_wait(queue, NREQ, &completedReqs, tags, statuses, GASPI_TEST);
 			if (eret != GASPI_SUCCESS && eret != GASPI_TIMEOUT) {
@@ -125,20 +118,11 @@ void Polling::pollQueues(void *data)
 				}
 			}
 		} while (completedReqs == NREQ);
-
-		mutex.unlock();
 	}
 }
 
 void Polling::pollNotifications(void *)
 {
-	SpinLock &mutex = _env.notificationPollingLock;
-	if (!mutex.trylock()) {
-		// This should not happen since polling services
-		// are called from a single thread at a time
-		return;
-	}
-
 	std::vector<WaitingRange*> completeRanges;
 
 	gaspi_segment_id_t seg;
@@ -149,6 +133,9 @@ void Polling::pollNotifications(void *)
 		queue.dequeueAll(list);
 		list.checkNotifications(completeRanges);
 
+		if (completeRanges.empty())
+			continue;
+
 		for (WaitingRange *range : completeRanges) {
 			assert(range != nullptr);
 
@@ -158,7 +145,5 @@ void Polling::pollNotifications(void *)
 		}
 		completeRanges.clear();
 	}
-
-	mutex.unlock();
 }
 
