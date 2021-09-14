@@ -16,13 +16,14 @@ with a derived implementation of OpenMP.
 This section describes the software requirements of TAGASPI, the building and installation
 process and how the library can be used from user applications.
 
-
 ## Software Requirements
 
 The Task-Aware MPI library requires the installation of the following tools and libraries:
 
 * Automake, autoconf, libtool, make and a C and C++ compiler.
-* GPI-2 extended with the low-level operations API.
+* [GPI-2](https://pm.bsc.es/gitlab/interoperability/extern/GPI-2) (branch `lowlevel`) which extends
+  the GASPI interface with the low-level operations API. We recommend configuring GPI-2 with MPI
+  support in order to use `mpirun` or `srun` for launching hybrid applications.
 * [Boost](http://boost.org) library version 1.59 or greater.
 * [OmpSs-2](https://github.com/bsc-pm/ompss-2-releases) (version 2018.11 or greater). Required
   when compiling the hybrid applications.
@@ -60,6 +61,17 @@ support. The building procedure installs a single `libtagaspi` library (both in 
 format). There is a header file which can be included from user applications that declare all needed
 functions and constants: `TAGASPI.h`.
 
+## Run-time Options
+
+The TAGASPI library has some run-time options that can be set through environment variables. These are:
+
+* `TAGASPI_POLLING_FREQUENCY` (default `500` us): The polling frequency in which the in-flight one-sided
+TAGASPI operations are checked by a transparent task in the background. This polling task is scheduled
+every specific number of microseconds to check the pending operations that have been issued by the tasks
+that called the TAGASPI communication services. This envar expects a positive integer number; the value `0`
+means that the task should be always running. Notice that the task leverages a CPU while running. By default,
+this task runs every `500` microseconds, but this value may be too high in communication-intensive applications.
+This envar is only considered when running with OmpSs-2 2020.06 or newer.
 
 ## Using TAGASPI in Hybrid Applications
 
