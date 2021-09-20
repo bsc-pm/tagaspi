@@ -11,6 +11,12 @@ TAGASPI is currently compatible with the [OmpSs-2](https://github.com/bsc-pm/omp
 task-based programming model. However, in the near future, it is going to be compatible
 with a derived implementation of OpenMP.
 
+## References
+
+More information about this work can be found in the article below. **Citations to the TAGASPI library should reference this article**:
+
+* Sala, K., Macià, S., & Beltran, V. (2021, September). **Combining One-Sided Communications with Task-Based Programming Models**. In 2021 IEEE International Conference on Cluster Computing (CLUSTER). IEEE. *(Accepted, pending publication)*
+
 # Getting Started
 
 This section describes the software requirements of TAGASPI, the building and installation
