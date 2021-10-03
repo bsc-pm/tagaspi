@@ -17,6 +17,11 @@ More information about this work can be found in the article below. **Citations 
 
 * Sala, K., Macià, S., & Beltran, V. (2021, September). **Combining One-Sided Communications with Task-Based Programming Models**. In 2021 IEEE International Conference on Cluster Computing (CLUSTER). IEEE. *(Accepted, pending publication)*
 
+## Acknowledgments
+
+This work was financially supported by the PRACE project funded in part by the EU’s Horizon 2020
+Research programme (2014-2020) under grant agreement 823767.
+
 # Getting Started
 
 This section describes the software requirements of TAGASPI, the building and installation
