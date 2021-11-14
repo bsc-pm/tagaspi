@@ -15,7 +15,7 @@ with a derived implementation of OpenMP.
 
 More information about this work can be found in the article below. **Citations to the TAGASPI library should reference this article**:
 
-* Sala, K., Macià, S., & Beltran, V. (2021, September). **Combining One-Sided Communications with Task-Based Programming Models**. In 2021 IEEE International Conference on Cluster Computing (CLUSTER). IEEE. *(Accepted, pending publication)*
+* Sala, K., Macia, S., & Beltran, V. (2021, September). **Combining One-Sided Communications with Task-Based Programming Models**. In 2021 IEEE International Conference on Cluster Computing (CLUSTER) (pp. 528-541). IEEE. [[Article link]](https://doi.org/10.1109/Cluster48925.2021.00024)
 
 ## Acknowledgments
 
