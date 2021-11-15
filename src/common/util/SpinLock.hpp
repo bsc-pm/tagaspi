@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2019-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2019-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef SPIN_LOCK_HPP
@@ -11,6 +11,7 @@
 
 #include <atomic>
 
+namespace tagaspi {
 
 class SpinLock {
 private:
@@ -58,6 +59,8 @@ public:
 		_buffer[idx].store(_next, std::memory_order_release);
 	}
 };
+
+} // namespace tagaspi
 
 #endif // SPIN_LOCK_HPP
 

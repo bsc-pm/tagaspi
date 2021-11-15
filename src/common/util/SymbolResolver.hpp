@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2019-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2019-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef SYMBOL_RESOLVER_HPP
@@ -11,6 +11,7 @@
 #include <dlfcn.h>
 #include <string>
 
+namespace tagaspi {
 
 //! Class that allows the dynamic loading of symbols at run-time
 class SymbolResolver {
@@ -31,5 +32,7 @@ public:
 		return symbol;
 	}
 };
+
+} // namespace tagaspi
 
 #endif // SYMBOL_RESOLVER_HPP

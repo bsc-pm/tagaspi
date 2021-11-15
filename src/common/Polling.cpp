@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+namespace tagaspi {
 
 EnvironmentVariable<uint64_t> Polling::_queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 1);
 EnvironmentVariable<uint64_t> Polling::_pollingFrequency("TAGASPI_POLLING_FREQUENCY", 500);
@@ -147,3 +148,4 @@ void Polling::pollNotifications(void *)
 	}
 }
 
+} // namespace tagaspi

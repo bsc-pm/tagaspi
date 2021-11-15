@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -15,10 +15,13 @@
 
 #include <cassert>
 
+using namespace tagaspi;
+
+#pragma GCC visibility push(default)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 gaspi_return_t
 tagaspi_notify_async_wait(const gaspi_segment_id_t segment_id,
@@ -90,3 +93,4 @@ tagaspi_notify_async_waitall(const gaspi_segment_id_t segment_id,
 }
 #endif
 
+#pragma GCC visibility pop

@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef UTILS_HPP
@@ -38,6 +38,7 @@
 #define MASK_RESET(a)   ((a) = (0ULL))
 #define MASK_COUNT(a)   (__builtin_popcountll(a))
 
+namespace tagaspi {
 namespace util {
 	typedef size_t mask_t;
 
@@ -77,5 +78,6 @@ namespace util {
 #endif
 	}
 } // namespace util
+} // namespace tagaspi
 
 #endif // UTILS_HPP

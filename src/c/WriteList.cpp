@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -11,6 +11,10 @@
 #include "common/TaskingModel.hpp"
 
 #include <cassert>
+
+using namespace tagaspi;
+
+#pragma GCC visibility push(default)
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,3 +61,5 @@ tagaspi_write_list(const gaspi_number_t num,
 #ifdef __cplusplus
 }
 #endif
+
+#pragma GCC visibility pop

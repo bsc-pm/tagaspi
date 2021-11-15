@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef ENVIRONMENT_HPP
@@ -14,19 +14,32 @@
 #include "QueueGroup.hpp"
 #include "util/SpinLock.hpp"
 
+namespace tagaspi {
+
+enum Operation {
+	READ = 0,
+	WRITE,
+	NOTIFY,
+	WRITE_NOTIFY,
+	NUM_OPERATIONS,
+};
 
 class Environment {
 public:
 	static const int MAX_QUEUE_GROUPS = 16;
 
 	bool enabled;
+
 	gaspi_number_t maxQueues;
 	gaspi_number_t maxSegments;
 	gaspi_number_t maxQueueGroups;
 	gaspi_number_t numQueueGroups;
+	gaspi_number_t numRequests[Operation::NUM_OPERATIONS];
+
 	WaitingRangeQueue *waitingRangeQueues;
 	WaitingRangeList *waitingRangeLists;
 	QueueGroup **queueGroups;
+
 	SpinLock *queuePollingLocks;
 	SpinLock notificationPollingLock;
 	SpinLock queueGroupsLock;
@@ -37,6 +50,7 @@ public:
 		maxSegments(0),
 		maxQueueGroups(0),
 		numQueueGroups(0),
+		numRequests(),
 		waitingRangeQueues(nullptr),
 		waitingRangeLists(nullptr),
 		queueGroups(nullptr),
@@ -52,5 +66,7 @@ public:
 };
 
 extern Environment _env;
+
+} // namespace tagaspi
 
 #endif // ENVIRONMENT_HPP

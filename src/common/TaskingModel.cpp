@@ -1,12 +1,13 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2019-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2019-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #include "TaskingModel.hpp"
 #include "util/SymbolResolver.hpp"
 
+namespace tagaspi {
 
 //! Enable/disable polling services
 EnvironmentVariable<bool> TaskingModel::_usePollingServices("TAGASPI_POLLING_SERVICES", false);
@@ -69,3 +70,5 @@ const std::string TaskingModel::_decreaseTaskEventCounterName("nanos6_decrease_t
 const std::string TaskingModel::_notifyTaskEventCounterAPIName("nanos6_notify_task_event_counter_api");
 const std::string TaskingModel::_spawnFunctionName("nanos6_spawn_function");
 const std::string TaskingModel::_waitForName("nanos6_wait_for");
+
+} // namespace tagaspi

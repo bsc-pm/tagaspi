@@ -13,6 +13,7 @@
 #include <numa.h>
 #include <sched.h>
 
+namespace tagaspi {
 
 class HardwareInfo {
 private:
@@ -121,5 +122,6 @@ public:
 	}
 };
 
+} // namespace tagaspi
 
 #endif // HARDWARE_INFO_HPP

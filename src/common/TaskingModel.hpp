@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2019-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2019-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef TASKING_MODEL_HPP
@@ -16,6 +16,7 @@
 #include "TaskingModelAPI.hpp"
 #include "util/EnvironmentVariable.hpp"
 
+namespace tagaspi {
 
 //! Class that gives access to the tasking model features
 class TaskingModel {
@@ -237,6 +238,8 @@ private:
 		info->_finished = true;
 	}
 };
+
+} // namespace tagaspi
 
 #endif // TASKING_MODEL_HPP
 

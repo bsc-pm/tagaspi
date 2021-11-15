@@ -1,10 +1,11 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
+#include <GASPI_Lowlevel.h>
 
 #include "Allocator.hpp"
 #include "Environment.hpp"
@@ -18,6 +19,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+namespace tagaspi {
 
 Environment _env;
 
@@ -45,6 +47,12 @@ void Environment::initialize()
 
 	_env.maxQueueGroups = MAX_QUEUE_GROUPS;
 	_env.numQueueGroups = 0;
+
+	gaspi_operation_get_num_requests(GASPI_OP_READ, 1, &_env.numRequests[Operation::READ]);
+	gaspi_operation_get_num_requests(GASPI_OP_WRITE, 1, &_env.numRequests[Operation::WRITE]);
+	gaspi_operation_get_num_requests(GASPI_OP_NOTIFY, 1, &_env.numRequests[Operation::NOTIFY]);
+	gaspi_operation_get_num_requests(GASPI_OP_WRITE_NOTIFY, 1, &_env.numRequests[Operation::WRITE_NOTIFY]);
+
 	_env.queueGroups = new QueueGroup*[_env.maxQueueGroups]();
 	assert(_env.queueGroups != nullptr);
 
@@ -81,6 +89,8 @@ void Environment::finalize()
 
 	HardwareInfo::finalize();
 }
+
+} // namespace tagaspi
 
 #if !defined(NDEBUG)
 namespace boost {
