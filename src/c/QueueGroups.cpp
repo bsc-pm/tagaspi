@@ -16,6 +16,10 @@
 #include <cstdio>
 #include <mutex>
 
+using namespace tagaspi;
+
+#pragma GCC visibility push(default)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -110,3 +114,4 @@ tagaspi_queue_group_max(gaspi_number_t * const queue_group_max)
 }
 #endif
 
+#pragma GCC visibility pop

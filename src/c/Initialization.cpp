@@ -8,6 +8,10 @@
 
 #include "common/Environment.hpp"
 
+using namespace tagaspi;
+
+#pragma GCC visibility push(default)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,3 +42,4 @@ tagaspi_proc_term(const gaspi_timeout_t timeout_ms)
 }
 #endif
 
+#pragma GCC visibility pop

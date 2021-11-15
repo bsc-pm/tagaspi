@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+namespace tagaspi {
 
 EnvironmentVariable<uint64_t> Polling::_queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 1);
 EnvironmentVariable<uint64_t> Polling::_pollingFrequency("TAGASPI_POLLING_FREQUENCY", 500);
@@ -147,3 +148,4 @@ void Polling::pollNotifications(void *)
 	}
 }
 
+} // namespace tagaspi

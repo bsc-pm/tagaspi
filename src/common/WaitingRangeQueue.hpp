@@ -19,6 +19,7 @@
 #define WR_QUEUE_CAPACITY (63*1024)
 #endif
 
+namespace tagaspi {
 
 class WaitingRangeQueue {
 private:
@@ -63,5 +64,7 @@ public:
 		}
 	}
 };
+
+} // namespace tagaspi
 
 #endif // WAITING_RANGE_QUEUE_HPP

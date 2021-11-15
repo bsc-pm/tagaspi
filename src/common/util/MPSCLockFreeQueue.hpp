@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <sys/types.h>
 
+namespace tagaspi {
 namespace util {
 
 template <typename T>
@@ -120,5 +121,6 @@ public:
 };
 
 } // namespace util
+} // namespace tagaspi
 
 #endif // MPSC_LOCKFREE_QUEUE_HPP

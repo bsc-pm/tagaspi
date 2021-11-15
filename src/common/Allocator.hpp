@@ -13,6 +13,8 @@
 
 #include <boost/lockfree/queue.hpp>
 
+namespace tagaspi {
+
 template <typename T>
 class Allocator {
 private:
@@ -87,5 +89,7 @@ typename Allocator<T>::queue_t* Allocator<T>::_queue = nullptr;
 
 template <typename T>
 T* Allocator<T>::_objects = nullptr;
+
+} // namespace tagaspi
 
 #endif // ALLOCATOR_HPP

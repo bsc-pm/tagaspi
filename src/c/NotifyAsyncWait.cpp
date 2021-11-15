@@ -15,10 +15,13 @@
 
 #include <cassert>
 
+using namespace tagaspi;
+
+#pragma GCC visibility push(default)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 gaspi_return_t
 tagaspi_notify_async_wait(const gaspi_segment_id_t segment_id,
@@ -90,3 +93,4 @@ tagaspi_notify_async_waitall(const gaspi_segment_id_t segment_id,
 }
 #endif
 
+#pragma GCC visibility pop

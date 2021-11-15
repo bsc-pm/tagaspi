@@ -12,6 +12,10 @@
 
 #include <cassert>
 
+using namespace tagaspi;
+
+#pragma GCC visibility push(default)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -55,3 +59,4 @@ tagaspi_read(const gaspi_segment_id_t segment_id_local,
 }
 #endif
 
+#pragma GCC visibility pop

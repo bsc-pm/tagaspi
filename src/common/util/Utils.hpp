@@ -38,6 +38,7 @@
 #define MASK_RESET(a)   ((a) = (0ULL))
 #define MASK_COUNT(a)   (__builtin_popcountll(a))
 
+namespace tagaspi {
 namespace util {
 	typedef size_t mask_t;
 
@@ -77,5 +78,6 @@ namespace util {
 #endif
 	}
 } // namespace util
+} // namespace tagaspi
 
 #endif // UTILS_HPP

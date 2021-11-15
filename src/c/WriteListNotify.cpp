@@ -12,6 +12,10 @@
 
 #include <cassert>
 
+using namespace tagaspi;
+
+#pragma GCC visibility push(default)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,3 +65,5 @@ tagaspi_write_list_notify(const gaspi_number_t num,
 #ifdef __cplusplus
 }
 #endif
+
+#pragma GCC visibility pop

@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+namespace tagaspi {
 
 Environment _env;
 
@@ -88,6 +89,8 @@ void Environment::finalize()
 
 	HardwareInfo::finalize();
 }
+
+} // namespace tagaspi
 
 #if !defined(NDEBUG)
 namespace boost {

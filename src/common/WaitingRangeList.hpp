@@ -14,6 +14,7 @@
 #include <deque>
 #include <vector>
 
+namespace tagaspi {
 
 class WaitingRangeList {
 private:
@@ -58,5 +59,7 @@ public:
 		return _list.empty();
 	}
 };
+
+} // namespace tagaspi
 
 #endif // WAITING_RANGE_LIST_HPP

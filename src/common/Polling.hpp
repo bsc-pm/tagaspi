@@ -15,6 +15,7 @@
 
 #include <cstdint>
 
+namespace tagaspi {
 
 class Polling {
 private:
@@ -58,5 +59,7 @@ public:
 
 	static void pollNotifications(void *data);
 };
+
+} // namespace tagaspi
 
 #endif // POLLING_HPP

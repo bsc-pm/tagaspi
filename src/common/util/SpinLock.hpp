@@ -11,6 +11,7 @@
 
 #include <atomic>
 
+namespace tagaspi {
 
 class SpinLock {
 private:
@@ -58,6 +59,8 @@ public:
 		_buffer[idx].store(_next, std::memory_order_release);
 	}
 };
+
+} // namespace tagaspi
 
 #endif // SPIN_LOCK_HPP
 

@@ -21,6 +21,7 @@
 #include <sys/sysinfo.h>
 #include <vector>
 
+namespace tagaspi {
 
 class QueueGroup {
 private:
@@ -180,5 +181,7 @@ private:
 		}
 	}
 };
+
+} // namespace tagaspi
 
 #endif // QUEUE_GROUP_HPP

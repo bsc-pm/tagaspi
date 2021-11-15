@@ -16,6 +16,7 @@
 #include "TaskingModelAPI.hpp"
 #include "util/EnvironmentVariable.hpp"
 
+namespace tagaspi {
 
 //! Class that gives access to the tasking model features
 class TaskingModel {
@@ -237,6 +238,8 @@ private:
 		info->_finished = true;
 	}
 };
+
+} // namespace tagaspi
 
 #endif // TASKING_MODEL_HPP
 

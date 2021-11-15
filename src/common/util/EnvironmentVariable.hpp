@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 
+namespace tagaspi {
 
 //! Class that represents an environment variable
 template <typename T>
@@ -90,5 +91,6 @@ public:
 	}
 };
 
+} // namespace tagaspi
 
 #endif // ENVIRONMENT_VARIABLE_HPP

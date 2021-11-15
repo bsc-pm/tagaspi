@@ -17,6 +17,8 @@
 #include <cassert>
 #include <cstdio>
 
+namespace tagaspi {
+
 class WaitingRange {
 protected:
 	gaspi_segment_id_t _segment;
@@ -157,5 +159,7 @@ public:
 		TaskingModel::decreaseTaskEventCounter(_eventCounter, 1);
 	}
 };
+
+} // namespace tagaspi
 
 #endif // WAITING_RANGE_HPP

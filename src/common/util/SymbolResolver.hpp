@@ -11,6 +11,7 @@
 #include <dlfcn.h>
 #include <string>
 
+namespace tagaspi {
 
 //! Class that allows the dynamic loading of symbols at run-time
 class SymbolResolver {
@@ -31,5 +32,7 @@ public:
 		return symbol;
 	}
 };
+
+} // namespace tagaspi
 
 #endif // SYMBOL_RESOLVER_HPP

@@ -14,6 +14,7 @@
 #include "QueueGroup.hpp"
 #include "util/SpinLock.hpp"
 
+namespace tagaspi {
 
 enum Operation {
 	READ = 0,
@@ -65,5 +66,7 @@ public:
 };
 
 extern Environment _env;
+
+} // namespace tagaspi
 
 #endif // ENVIRONMENT_HPP
