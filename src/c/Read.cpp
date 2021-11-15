@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -33,8 +33,9 @@ tagaspi_read(const gaspi_segment_id_t segment_id_local,
 
 	gaspi_tag_t tag = (gaspi_tag_t) counter;
 
-	// TODO: Use gaspi_operation_get_num_requests
-	gaspi_number_t numRequests = 1;
+	gaspi_number_t numRequests = _env.numRequests[Operation::READ];
+	assert(numRequestes > 0);
+
 	TaskingModel::increaseCurrentTaskEventCounter(counter, numRequests);
 
 	eret = gaspi_operation_submit(GASPI_OP_READ, tag,
