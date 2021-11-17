@@ -35,31 +35,14 @@ AX_VAR_PUSHVALUE([LDFLAGS],[$LDFLAGS $gaspilib])
 AX_VAR_PUSHVALUE([LIBS],[])
 
 AC_MSG_CHECKING([which implementation to target])
-  AC_MSG_RESULT([GPI2])
-  AC_CHECK_HEADERS([GASPI.h], [gaspi=yes; break], [gaspi=no])
-  AS_IF([test "$gaspi" = "yes"],[
-    AC_CHECK_HEADERS([GASPI_Lowlevel.h], [gaspi=yes; break], [gaspi=no])
-  ])
-  search_lib=GPI2
-  required_libs="-lpthread -libverbs"
+AC_MSG_RESULT([GPI2])
+AC_CHECK_HEADERS([GASPI.h], [gaspi=yes; break], [gaspi=no])
+AS_IF([test "$gaspi" = "yes"],[
+  AC_CHECK_HEADERS([GASPI_Lowlevel.h], [gaspi=yes; break], [gaspi=no])
+])
 
-
-m4_foreach([function],
-           [gaspi_operation_submit,
-            gaspi_operation_list_submit,
-            gaspi_operation_get_num_requests,
-            gaspi_request_wait],
-           [
-             AS_IF([test "$gaspi" = "yes"],[
-               AC_SEARCH_LIBS(function,
-                              [$search_lib],
-                              [gaspi=yes],
-                              [gaspi=no],
-                              [$required_libs])dnl
-             ])
-           ])dnl
-
-gaspilibs=$LIBS
+gaspilib=
+gaspilibs=
 
 AX_VAR_POPVALUE([CPPFLAGS])
 AX_VAR_POPVALUE([CFLAGS])
