@@ -32,9 +32,10 @@ process and how the library can be used from user applications.
 The Task-Aware MPI library requires the installation of the following tools and libraries:
 
 * Automake, autoconf, libtool, make and a C and C++ compiler.
-* [GPI-2](https://pm.bsc.es/gitlab/interoperability/extern/GPI-2) (branch `lowlevel`) which extends
+* [GPI-2](https://pm.bsc.es/gitlab/interoperability/extern/GPI-2) (tag `tagaspi-2021.11`) which extends
   the GASPI interface with the low-level operations API. We recommend configuring GPI-2 with MPI
-  support in order to use `mpirun` or `srun` for launching hybrid applications.
+  support in order to use `mpirun` or `srun` for launching hybrid applications. The GPI-2 version
+  that supports the current TAGASPI version is the one included in the tag `tagaspi-2021.11`.
 * [Boost](http://boost.org) library version 1.59 or greater.
 * [OmpSs-2](https://github.com/bsc-pm/ompss-2-releases) (version 2018.11 or greater). Required
   when compiling the hybrid applications.
