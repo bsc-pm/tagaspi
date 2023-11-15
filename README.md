@@ -77,12 +77,12 @@ functions and constants: `TAGASPI.h`.
 
 The TAGASPI library has some run-time options that can be set through environment variables. These are:
 
-* `TAGASPI_POLLING_FREQUENCY` (default `500` us): The polling frequency in which the in-flight one-sided
+* `TAGASPI_POLLING_FREQUENCY` (default `100` us): The polling frequency in which the in-flight one-sided
 TAGASPI operations are checked by a transparent task in the background. This polling task is scheduled
 every specific number of microseconds to check the pending operations that have been issued by the tasks
 that called the TAGASPI communication services. This envar expects a positive integer number; the value `0`
 means that the task should be always running. Notice that the task leverages a CPU while running. By default,
-this task runs every `500` microseconds, but this value may be too high in communication-intensive applications.
+this task runs every `100` microseconds, but this value may be too high in communication-intensive applications.
 This envar is only considered when running with OmpSs-2 2020.06 or newer.
 
 ## Using TAGASPI in Hybrid Applications
