@@ -29,7 +29,7 @@ protected:
 
 	gaspi_number_t _remaining;
 
-	void *_eventCounter;
+	TaskingModel::task_handle_t _task;
 
 public:
 	typedef boost::intrusive::link_mode<boost::intrusive::normal_link> link_mode_t;
@@ -43,25 +43,20 @@ public:
 		gaspi_number_t numNotifications,
 		gaspi_notification_t *notifiedValues,
 		gaspi_number_t remainingNotifications,
-		void *eventCounter
+		TaskingModel::task_handle_t task
 	) :
 		_segment(segment),
 		_firstId(firstNotificationId),
 		_numIds(numNotifications),
 		_notifiedValues(notifiedValues),
 		_remaining(remainingNotifications),
-		_eventCounter(eventCounter)
+		_task(task)
 	{
 	}
 
 	inline ~WaitingRange()
 	{
 		assert(_remaining == 0);
-	}
-
-	inline void *getEventCounter() const
-	{
-		return _eventCounter;
 	}
 
 	inline bool checkNotifications()
@@ -156,7 +151,7 @@ public:
 
 	inline void complete()
 	{
-		TaskingModel::decreaseTaskEventCounter(_eventCounter, 1);
+		TaskingModel::decreaseTaskEvents(_task, 1);
 	}
 };
 

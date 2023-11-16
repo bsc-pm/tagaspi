@@ -1,74 +1,62 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2019-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2023 Barcelona Supercomputing Center (BSC)
 */
 
+#include "Symbol.hpp"
 #include "TaskingModel.hpp"
-#include "util/SymbolResolver.hpp"
+#include "util/ErrorHandler.hpp"
 
 namespace tagaspi {
 
-//! Enable/disable polling services
-EnvironmentVariable<bool> TaskingModel::_usePollingServices("TAGASPI_POLLING_SERVICES", false);
-
-
 void TaskingModel::initialize()
 {
-	// Try to load the functions required by polling tasks
-	_waitFor = (wait_for_t *) SymbolResolver::load(_waitForName, false);
-	_spawnFunction = (spawn_function_t *) SymbolResolver::load(_spawnFunctionName, false);
+	_alpi_version_check.load();
+	_alpi_version_get.load();
+	_alpi_task_self.load();
+	_alpi_task_spawn.load();
+	_alpi_task_waitfor_ns.load();
+	_alpi_task_events_increase.load();
+	_alpi_task_events_decrease.load();
 
-	// Switch to polling services if polling tasks are not available
-	if (!_usePollingServices && (!_waitFor || !_spawnFunction)) {
-		_usePollingServices.setValue(true);
-	}
+	int expected[2] = { ALPI_VERSION_MAJOR, ALPI_VERSION_MINOR };
+	int provided[2];
 
-	// Load the polling service functions if needed
-	if (_usePollingServices) {
-		_registerPollingService = (register_polling_service_t *)
-			SymbolResolver::load(_registerPollingServiceName);
-		_unregisterPollingService = (unregister_polling_service_t *)
-			SymbolResolver::load(_unregisterPollingServiceName);
-	}
+	if (int err = _alpi_version_get(&provided[0], &provided[1]))
+		ErrorHandler::fail("Failed alpi_version_get: ", getError(err));
 
-	// Load the task events API functions
-	_getCurrentEventCounter = (get_current_event_counter_t *)
-		SymbolResolver::load(_getCurrentEventCounterName);
-	_increaseCurrentTaskEventCounter = (increase_current_task_event_counter_t *)
-		SymbolResolver::load(_increaseCurrentTaskEventCounterName);
-	_decreaseTaskEventCounter = (decrease_task_event_counter_t *)
-		SymbolResolver::load(_decreaseTaskEventCounterName);
-
-	_notifyTaskEventCounterAPI = (notify_task_event_counter_api_t *)
-		SymbolResolver::load(_notifyTaskEventCounterAPIName, false);
-
-	// Notify the tasking runtime that the event counters
-	// API may be used during the execution. This function
-	// is not required so call it only if defined
-	if (_notifyTaskEventCounterAPI) {
-		(*_notifyTaskEventCounterAPI)();
-	}
+	int err = _alpi_version_check(expected[0], expected[1]);
+	if (err == ALPI_ERR_VERSION)
+		ErrorHandler::fail("Incompatible ALPI tasking interface versions:\n",
+			"\tExpected: ", expected[0], ".", expected[1], "\n",
+			"\tProvided: ", provided[0], ".", provided[1]);
+	else if (err)
+		ErrorHandler::fail("Failed alpi_version_check: ", getError(err));
 }
 
-//! The pointers to the tasking model API functions
-register_polling_service_t *TaskingModel::_registerPollingService = nullptr;
-unregister_polling_service_t *TaskingModel::_unregisterPollingService = nullptr;
-get_current_event_counter_t *TaskingModel::_getCurrentEventCounter = nullptr;
-increase_current_task_event_counter_t *TaskingModel::_increaseCurrentTaskEventCounter = nullptr;
-decrease_task_event_counter_t *TaskingModel::_decreaseTaskEventCounter = nullptr;
-notify_task_event_counter_api_t *TaskingModel::_notifyTaskEventCounterAPI = nullptr;
-spawn_function_t *TaskingModel::_spawnFunction = nullptr;
-wait_for_t *TaskingModel::_waitFor = nullptr;
+Symbol<TaskingModel::alpi_error_string_t>
+TaskingModel::_alpi_error_string("alpi_error_string");
 
-//! Actual names of the tasking model API functions
-const std::string TaskingModel::_registerPollingServiceName("nanos6_register_polling_service");
-const std::string TaskingModel::_unregisterPollingServiceName("nanos6_unregister_polling_service");
-const std::string TaskingModel::_getCurrentEventCounterName("nanos6_get_current_event_counter");
-const std::string TaskingModel::_increaseCurrentTaskEventCounterName("nanos6_increase_current_task_event_counter");
-const std::string TaskingModel::_decreaseTaskEventCounterName("nanos6_decrease_task_event_counter");
-const std::string TaskingModel::_notifyTaskEventCounterAPIName("nanos6_notify_task_event_counter_api");
-const std::string TaskingModel::_spawnFunctionName("nanos6_spawn_function");
-const std::string TaskingModel::_waitForName("nanos6_wait_for");
+Symbol<TaskingModel::alpi_version_check_t>
+TaskingModel::_alpi_version_check("alpi_version_check");
+
+Symbol<TaskingModel::alpi_version_get_t>
+TaskingModel::_alpi_version_get("alpi_version_get");
+
+Symbol<TaskingModel::alpi_task_self_t>
+TaskingModel::_alpi_task_self("alpi_task_self");
+
+Symbol<TaskingModel::alpi_task_events_increase_t>
+TaskingModel::_alpi_task_events_increase("alpi_task_events_increase");
+
+Symbol<TaskingModel::alpi_task_events_decrease_t>
+TaskingModel::_alpi_task_events_decrease("alpi_task_events_decrease");
+
+Symbol<TaskingModel::alpi_task_waitfor_ns_t>
+TaskingModel::_alpi_task_waitfor_ns("alpi_task_waitfor_ns");
+
+Symbol<TaskingModel::alpi_task_spawn_t>
+TaskingModel::_alpi_task_spawn("alpi_task_spawn");
 
 } // namespace tagaspi

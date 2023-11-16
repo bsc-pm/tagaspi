@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2019-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2023 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef TASKING_MODEL_HPP
@@ -13,7 +13,8 @@
 #include <cstdint>
 #include <string>
 
-#include "TaskingModelAPI.hpp"
+#include "ALPI.hpp"
+#include "Symbol.hpp"
 #include "util/EnvironmentVariable.hpp"
 
 namespace tagaspi {
@@ -21,63 +22,44 @@ namespace tagaspi {
 //! Class that gives access to the tasking model features
 class TaskingModel {
 public:
-	//! Prototype of a polling instance function
-	typedef void (*polling_function_t)(void *args);
+	typedef struct alpi_task *task_handle_t;
+	typedef uint64_t (*polling_function_t)(void *args);
 
-	//! Handle of polling instances
-	typedef size_t polling_handle_t;
-
-private:
-	//! Pointers to the tasking model functions
-	static register_polling_service_t *_registerPollingService;
-	static unregister_polling_service_t *_unregisterPollingService;
-	static get_current_event_counter_t *_getCurrentEventCounter;
-	static increase_current_task_event_counter_t *_increaseCurrentTaskEventCounter;
-	static decrease_task_event_counter_t *_decreaseTaskEventCounter;
-	static notify_task_event_counter_api_t *_notifyTaskEventCounterAPI;
-	static spawn_function_t *_spawnFunction;
-	static wait_for_t *_waitFor;
-
-	//! Actual names of the tasking model functions
-	static const std::string _registerPollingServiceName;
-	static const std::string _unregisterPollingServiceName;
-	static const std::string _getCurrentEventCounterName;
-	static const std::string _increaseCurrentTaskEventCounterName;
-	static const std::string _decreaseTaskEventCounterName;
-	static const std::string _notifyTaskEventCounterAPIName;
-	static const std::string _spawnFunctionName;
-	static const std::string _waitForName;
-
-	//! Determine whether the polling feature should be done through
-	//! polling services. By default it is disabled, which makes the
-	//! polling feature to be implemented using tasks that are paused
-	//! periodically. This variable is called TAGASPI_POLLING_SERVICES
-	static EnvironmentVariable<bool> _usePollingServices;
-
-	//! Internal structure to represent a polling instance
-	struct PollingInfo {
+	//! Structure that stores information regarding a polling instance
+	struct PollingInstance {
 		std::string _name;
 		polling_function_t _function;
 		void *_args;
-		uint64_t _frequency;
 		std::atomic<bool> _mustFinish;
 		std::atomic<bool> _finished;
 
-		inline PollingInfo(
-			const std::string &name,
-			polling_function_t function,
-			void *args,
-			uint64_t frequency
-		) :
-			_name(name),
-			_function(function),
-			_args(args),
-			_frequency(frequency),
-			_mustFinish(false),
-			_finished(false)
+		PollingInstance(const std::string &name, polling_function_t function, void *args) :
+			_name(name), _function(function), _args(args),
+			_mustFinish(false), _finished(false)
 		{
 		}
 	};
+
+private:
+	//! The symbol declarations of the tasking model functions
+	using alpi_error_string_t = SymbolDecl<const char *, int>;
+	using alpi_version_check_t = SymbolDecl<int, int, int>;
+	using alpi_version_get_t = SymbolDecl<int, int *, int *>;
+	using alpi_task_self_t = SymbolDecl<int, struct alpi_task **>;
+	using alpi_task_events_increase_t = SymbolDecl<int, struct alpi_task *, uint64_t>;
+	using alpi_task_events_decrease_t = SymbolDecl<int, struct alpi_task *, uint64_t>;
+	using alpi_task_waitfor_ns_t = SymbolDecl<int, uint64_t, uint64_t *>;
+	using alpi_task_spawn_t = SymbolDecl<int, void (*)(void *), void *, void (*)(void *), void *, const char *, const struct alpi_attr *>;
+
+	//! The symbols of the tasking model functions
+	static Symbol<alpi_error_string_t> _alpi_error_string;
+	static Symbol<alpi_version_check_t> _alpi_version_check;
+	static Symbol<alpi_version_get_t> _alpi_version_get;
+	static Symbol<alpi_task_self_t> _alpi_task_self;
+	static Symbol<alpi_task_events_increase_t> _alpi_task_events_increase;
+	static Symbol<alpi_task_events_decrease_t> _alpi_task_events_decrease;
+	static Symbol<alpi_task_waitfor_ns_t> _alpi_task_waitfor_ns;
+	static Symbol<alpi_task_spawn_t> _alpi_task_spawn;
 
 public:
 	//! \brief Initialize and load the symbols of the tasking model
@@ -85,39 +67,33 @@ public:
 
 	//! \brief Register a polling instance
 	//!
-	//! This function registers a polling instance, which will call
-	//! the specified function with its argument periodically. The
-	//! polling function must accept a pointer to void and should
-	//! not return anything
+	//! This function registers a polling instance, which will call the
+	//! specified function with its argument periodically. The polling
+	//! function must follow the type polling_function_t
 	//!
 	//! \param name The name of the polling instance
 	//! \param function The function to be called periodically
 	//! \param args The arguments of the function
-	//! \param frequency The frequency at which to call the function
-	//!                  in microseconds. This parameter is ignored
-	//!                  when leveraging polling services
 	//!
 	//! \returns A polling handle to unregister the instance once
 	//!          the polling should finish
-	static inline polling_handle_t registerPolling(
+	static PollingInstance *registerPolling(
 		const std::string &name,
 		polling_function_t function,
-		void *args,
-		uint64_t frequency
+		void *args
 	) {
-		PollingInfo *info = new PollingInfo(name, function, args, frequency);
-		assert(info != nullptr);
+		PollingInstance *instance = new PollingInstance(name, function, args);
+		assert(instance != nullptr);
 
-		if (_usePollingServices) {
-			// Register a polling service
-			assert(_registerPollingService);
-			(*_registerPollingService)(name.c_str(), pollingServiceFunction, info);
-		} else {
-			// Spawn a function that will do the periodic polling
-			assert(_spawnFunction);
-			(*_spawnFunction)(pollingTaskFunction, info, pollingTaskCompletes, info, name.c_str());
-		}
-		return (polling_handle_t) info;
+		// Spawn a task that will do the periodic polling
+		int err = _alpi_task_spawn(
+			genericPolling, static_cast<void *>(instance),
+			genericCompleted, static_cast<void *>(instance),
+			name.data(), nullptr);
+		if (err)
+			ErrorHandler::fail("Failed alpi_task_spawn: ", getError(err));
+
+		return instance;
 	}
 
 	//! \brief Unregister a polling instance
@@ -129,117 +105,100 @@ public:
 	//! polling instances may continue calling that function
 	//!
 	//! \param handle The handle of the polling instance to unregister
-	static inline void unregisterPolling(polling_handle_t handle)
+	static void unregisterPolling(PollingInstance *instance)
 	{
-		PollingInfo *info = (PollingInfo *) handle;
-		assert(info != nullptr);
+		assert(instance != nullptr);
 
 		// Notify that the polling should stop
-		info->_mustFinish = true;
+		instance->_mustFinish = true;
 
-		if (_usePollingServices) {
-			// Unregister the polling service
-			assert(_unregisterPollingService);
-			(*_unregisterPollingService)(info->_name.c_str(), pollingServiceFunction, info);
-		} else {
-			// Wait until the spawned task completes
-			while (!info->_finished);
+		// Wait until the spawned task completes
+		while (!instance->_finished) {
+			// Task yield to avoid consuming a CPU for waiting. Otherwise, in
+			// the case of a single CPU, the execution could hang
+			if (int err = _alpi_task_waitfor_ns(1000000, nullptr))
+				ErrorHandler::fail("Failed alpi_task_waitfor_ns: ", getError(err));
 		}
-		delete info;
+		delete instance;
 	}
 
-	//! \brief Get the event counter of the current task
-	//!
-	//! \returns An opaque pointer of the event counter
-	static inline void *getCurrentEventCounter()
+	//! \brief Get the current task handle
+	static task_handle_t getCurrentTask()
 	{
-		assert(_getCurrentEventCounter);
-		return (*_getCurrentEventCounter)();
+		struct alpi_task *task;
+		if (int err = _alpi_task_self(&task))
+			ErrorHandler::fail("Failed alpi_task_self: ", getError(err));
+
+		return task;
 	}
 
-	//! \brief Increase the event counter of the current task
+	//! \brief Increase the events of the current task
 	//!
-	//! \param counter The event counter of the current task
+	//! \param task The current task's handle
 	//! \param increment The amount of events to increase
-	static inline void increaseCurrentTaskEventCounter(void *counter, unsigned int increment)
+	static void increaseCurrentTaskEvents(task_handle_t task, uint64_t increment)
 	{
-		assert(_increaseCurrentTaskEventCounter);
-		(*_increaseCurrentTaskEventCounter)(counter, increment);
+		if (int err = _alpi_task_events_increase(task, increment))
+			ErrorHandler::fail("Failed alpi_task_events_increase: ", getError(err));
 	}
 
-	//! \brief Decrease the event counter of a task
+	//! \brief Decrease the events of a task
 	//!
-	//! \param counter The event counter of the target task
+	//! \param task The task's handle to decrease events
 	//! \param decrement The amount of events to decrease
-	static inline void decreaseTaskEventCounter(void *counter, unsigned int decrement)
+	static void decreaseTaskEvents(task_handle_t task, uint64_t decrement)
 	{
-		assert(_decreaseTaskEventCounter);
-		(*_decreaseTaskEventCounter)(counter, decrement);
+		if (int err = _alpi_task_events_decrease(task, decrement))
+			ErrorHandler::fail("Failed alpi_task_events_decrease: ", getError(err));
 	}
 
 private:
-	//! \brief Function called by all polling services
+	//! \brief Wrapper function called by all polling tasks
 	//!
-	//! This function is periodically called by all polling
-	//! services when implementing polling instances with
-	//! that tasking model feature
+	//! This function is called once for each polling instance and is
+	//! executed by a task. This function runs on a loop until the
+	//! instance is unregistered. The body of the loop performs a call
+	//! to the polling instance function and then blocks the task for
+	//! a time specified by that function as its return value
 	//!
-	//! \param args An opaque pointer to the polling info
-	//!
-	//! \returns Whether the polling service should unregister
-	static inline int pollingServiceFunction(void *args)
+	//! \param args An opaque pointer to the polling instance
+	static void genericPolling(void *args)
 	{
-		PollingInfo *info = (PollingInfo *) args;
-		assert(info != nullptr);
-
-		// Call the actual polling function
-		info->_function(info->_args);
-
-		// Do not unregister the service
-		return 0;
-	}
-
-	//! \brief Function called by all polling tasks
-	//!
-	//! This is called only once per polling task when
-	//! implementing polling instances with that tasking
-	//! model feature. This represents the body of all
-	//! polling tasks
-	//!
-	//! \param args An opaque pointer to the polling info
-	static inline void pollingTaskFunction(void *args)
-	{
-		PollingInfo *info = (PollingInfo *) args;
-		assert(info != nullptr);
-		assert(_waitFor);
+		PollingInstance *instance = static_cast<PollingInstance *>(args);
+		assert(instance != nullptr);
 
 		// Poll until it is externally notified to stop
-		while (!info->_mustFinish) {
+		while (!instance->_mustFinish) {
 			// Call the actual polling function
-			info->_function(info->_args);
+			uint64_t target = instance->_function(instance->_args);
 
 			// Pause the polling task for some microseconds
-			(*_waitFor)(info->_frequency);
+			if (int err = _alpi_task_waitfor_ns(target * 1000, nullptr))
+				ErrorHandler::fail("Failed task_waitfor_ns: ", getError(err));
 		}
 	}
 
-	//! \brief Function called by a polling task when completes
+	//! \brief Function called by a polling task is completed
 	//!
-	//! This function is called when a polling task fully
-	//! completes (e.g., all child tasks have completed)
-	//!
-	//! \param args An opaque pointer to the polling info
-	static inline void pollingTaskCompletes(void *args)
+	//! \param args An opaque pointer to the polling instance
+	static void genericCompleted(void *args)
 	{
-		PollingInfo *info = (PollingInfo *) args;
-		assert(info != nullptr);
+		PollingInstance *instance = static_cast<PollingInstance *>(args);
+		assert(instance != nullptr);
 
 		// The polling task has completed
-		info->_finished = true;
+		instance->_finished = true;
+	}
+
+	//! \brief Get the string describing the alpi error
+	//!
+	//! \param error The error code
+	static const char *getError(int error)
+	{
+		return _alpi_error_string(error);
 	}
 };
 
 } // namespace tagaspi
 
 #endif // TASKING_MODEL_HPP
-

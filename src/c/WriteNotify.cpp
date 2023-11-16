@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2023 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -34,15 +34,15 @@ tagaspi_write_notify(const gaspi_segment_id_t segment_id_local,
 	assert(_env.enabled);
 	gaspi_return_t eret;
 
-	void *counter = TaskingModel::getCurrentEventCounter();
-	assert(counter != NULL);
+	TaskingModel::task_handle_t task = TaskingModel::getCurrentTask();
+	assert(task != NULL);
 
-	gaspi_tag_t tag = (gaspi_tag_t) counter;
+	gaspi_tag_t tag = (gaspi_tag_t) task;
 
 	gaspi_number_t numRequests = _env.numRequests[Operation::WRITE_NOTIFY];
 	assert(numRequests > 0);
 
-	TaskingModel::increaseCurrentTaskEventCounter(counter, numRequests);
+	TaskingModel::increaseCurrentTaskEvents(task, numRequests);
 
 	eret = gaspi_operation_submit(GASPI_OP_WRITE_NOTIFY, tag,
 				segment_id_local, offset_local, rank,
@@ -52,7 +52,7 @@ tagaspi_write_notify(const gaspi_segment_id_t segment_id_local,
 	assert(eret != GASPI_TIMEOUT);
 
 	if (eret != GASPI_SUCCESS) {
-		TaskingModel::decreaseTaskEventCounter(counter, numRequests);
+		TaskingModel::decreaseTaskEvents(task, numRequests);
 	}
 
 	return eret;
