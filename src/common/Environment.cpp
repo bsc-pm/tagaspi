@@ -13,6 +13,7 @@
 #include "Polling.hpp"
 #include "TaskingModel.hpp"
 #include "WaitingRange.hpp"
+#include "util/ErrorHandler.hpp"
 #include "util/SpinLock.hpp"
 
 #include <cassert>
@@ -22,6 +23,8 @@
 namespace tagaspi {
 
 Environment _env;
+
+SpinLock ErrorHandler::_lock;
 
 std::vector<int> HardwareInfo::_cpuToNUMANode;
 std::vector<bool> HardwareInfo::_numaNodeAvailability;
