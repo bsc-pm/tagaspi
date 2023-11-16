@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2023 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef UTILS_HPP
@@ -28,7 +28,7 @@
 #endif
 
 #ifndef MAX_SYSTEM_CPUS
-#define MAX_SYSTEM_CPUS 50
+#define MAX_SYSTEM_CPUS 64
 #endif
 
 #define MASK_BITS(a)    (sizeof(a)*8)
