@@ -1,7 +1,16 @@
 #	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 #
-#	Copyright (C) 2018-2020 Barcelona Supercomputing Center (BSC)
+#	Copyright (C) 2018-2023 Barcelona Supercomputing Center (BSC)
 
+
+AC_DEFUN([AX_CHECK_CXX_VERSION], [
+	AC_MSG_CHECKING([the ${CXX} version])
+	if test x"$CXX" != x"" ; then
+		CXX_VERSION=$(${CXX} --version | head -1)
+	fi
+	AC_MSG_RESULT([$CXX_VERSION])
+	AC_SUBST([CXX_VERSION])
+])
 
 AC_DEFUN([AC_CHECK_COMPILER_FLAG],
 	[

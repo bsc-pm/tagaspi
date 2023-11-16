@@ -31,7 +31,7 @@ process and how the library can be used from user applications.
 
 The Task-Aware MPI library requires the installation of the following tools and libraries:
 
-* Automake, autoconf, libtool, make and a C and C++ compiler.
+* Automake, autoconf, libtool, make and and C++ compiler supporting C++17.
 * [GPI-2](https://pm.bsc.es/gitlab/interoperability/extern/GPI-2) (tag `tagaspi-2021.11`) which extends
   the GASPI interface with the low-level operations API. We recommend configuring GPI-2 with MPI
   support in order to use `mpirun` or `srun` for launching hybrid applications. The GPI-2 version

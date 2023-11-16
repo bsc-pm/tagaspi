@@ -20,7 +20,9 @@ AX_COMPILE_FLAGS
 # Look for a valid C++ compiler
 AC_PROG_CXX
 AC_PROG_FC
-AX_CXX_COMPILE_STDCXX_11([], [mandatory])
+
+# Retrieve compiler version
+AX_CHECK_CXX_VERSION
 
 # AM_PROG_AR must be called before LT_INIT or a warning ensues
 AM_PROG_AR
@@ -45,20 +47,13 @@ AX_BOOST_BASE([1.59], [], [ AC_MSG_ERROR([Boost library not found])])
 # Checks for typedefs, structures, and compiler characteristics
 AC_TYPE_SIZE_T
 
-AC_CHECK_EXTRACT_FIRST_COMPILER_FLAG([FALIGNED_NEW_FLAG], [-faligned-new])
-AX_APPEND_FLAG([${FALIGNED_NEW_FLAG}], [tagaspi_CXXFLAGS])
-AC_SUBST(tagaspi_CXXFLAGS)
+# Check that the compiler supports C++17
+AX_CXX_COMPILE_STDCXX_17([noext], [mandatory])
 
+# Check the CPU count of the system
 AX_CHECK_CPUS
 
 LT_INIT([shared static pic-only])
-
-# Enable/disable architecture specific code
-AS_CASE([$host],
-  [x86_64*],[ARCH=x86_64])
-AS_IF([test "$ARCH" = "x86_64"],[
-  AC_DEFINE([X86_64_ARCH],[1],[Compiling for x86_64 host])
-])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
@@ -66,15 +61,17 @@ AC_OUTPUT
 echo ""
 echo ""
 echo "Configuration summary:"
+echo "    Compiler version... ${CXX_VERSION}"
+echo ""
 echo "    Installation prefix... ${prefix}"
 echo ""
 echo "    CXXFLAGS... ${tagaspi_CXXFLAGS} ${CXXFLAGS}"
 echo "    CPPFLAGS... ${tagaspi_CPPFLAGS} ${CPPFLAGS}"
+echo "    LDFLAGS... ${LDFLAGS}"
 echo ""
 echo "    GASPI CPPFLAGS... ${gaspiinc}"
 echo ""
 echo "    Boost CPPFLAGS... ${BOOST_CPPFLAGS}"
-echo "    Boost LDFLAGS... ${BOOST_LDFLAGS}"
 echo ""
 echo "    libnuma CPPFLAGS... ${libnuma_CPPFLAGS}"
 echo "    libnuma LIBS... ${libnuma_LIBS}"
