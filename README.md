@@ -8,8 +8,8 @@ way, communication tasks can run in parallel, and also, they can overlap with co
 tasks.
 
 TAGASPI is currently compatible with the [OmpSs-2](https://github.com/bsc-pm/ompss-2-releases)
-task-based programming model. However, in the near future, it is going to be compatible
-with a derived implementation of OpenMP.
+task-based programming model and the [LLVM/OpenMP](https://github.com/bsc-pm/llvm) derivative
+implementation.
 
 ## References
 
@@ -29,7 +29,7 @@ process and how the library can be used from user applications.
 
 ## Software Requirements
 
-The Task-Aware MPI library requires the installation of the following tools and libraries:
+The Task-Aware GASPI library requires the installation of the following tools and libraries:
 
 * Automake, autoconf, libtool, make and and C++ compiler supporting C++17.
 * [GPI-2](https://pm.bsc.es/gitlab/interoperability/extern/GPI-2) (tag `tagaspi-2021.11`) which extends
@@ -37,8 +37,9 @@ The Task-Aware MPI library requires the installation of the following tools and 
   support in order to use `mpirun` or `srun` for launching hybrid applications. The GPI-2 version
   that supports the current TAGASPI version is the one included in the tag `tagaspi-2021.11`.
 * [Boost](http://boost.org) library version 1.59 or greater.
-* [OmpSs-2](https://github.com/bsc-pm/ompss-2-releases) (version 2018.11 or greater). Required
-  when compiling the hybrid applications.
+* One of the following parallel task-based programming models (required when compiling a user application):
+	- [OmpSs-2](https://github.com/bsc-pm/ompss-2-releases) (version 2023.11 or greater).
+	- The derivative implementation of [LLVM/OpenMP](https://github.com/bsc-pm/llvm).
 
 ## Building and Installing
 
@@ -96,7 +97,7 @@ library. Assuming that GPI-2 was built with MPI interoperability, a hybrid OmpSs
 compiled and linked as follows:
 
 ```bash
-$ mpicxx -cxx=mcxx --ompss-2 -I$TAGASPI_HOME/include -I$GPI2_HOME/include app.cpp -o app.bin -ltagaspi -L$TAGASPI_HOME/lib -lGPI2 -L$GPI2_HOME/lib
+$ mpicxx -cxx=clang++ -fompss-2 -I$TAGASPI_HOME/include -I$GPI2_HOME/include app.cpp -o app.bin -ltagaspi -L$TAGASPI_HOME/lib -lGPI2 -L$GPI2_HOME/lib
 ```
 
 Finally, the application binary can be launched as a regular GASPI/MPI program:
@@ -105,3 +106,12 @@ Finally, the application binary can be launched as a regular GASPI/MPI program:
 $ mpirun -n 4 ...binding options... ./app.bin
 ```
 
+## ALPI Tasking Interface
+
+The Task-Aware GASPI library relies on the [ALPI](https://gitlab.bsc.es/alpi/alpi) interface to communicate with
+the underlying tasking runtime system. This interface is internally used by TAGASPI to spawn internal tasks and
+add external events to user tasks that call TAGASPI functions. These lowlevel functionalities provide support for
+the TAGASPI asynchronous features.
+
+The required interface is ALPI 1.0 (or any compatible) and it is included in the [ALPI.hpp](src/common/ALPI.hpp)
+header. Any tasking runtime system can support this TAGASPI library by providing support to this interface version.
