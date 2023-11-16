@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2023 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef ALLOCATOR_HPP
@@ -18,9 +18,9 @@ namespace tagaspi {
 template <typename T>
 class Allocator {
 private:
-	static const int NUM_ENTRIES = (64*1000);
+	static constexpr int NumEntries = (64*1000);
 
-	typedef boost::lockfree::queue<T*, boost::lockfree::capacity<NUM_ENTRIES> > queue_t;
+	typedef boost::lockfree::queue<T*, boost::lockfree::capacity<NumEntries>> queue_t;
 
 	static T *_objects;
 
@@ -31,14 +31,14 @@ public:
 	{
 		assert(!initialized());
 
-		_objects = (T *) std::malloc(NUM_ENTRIES * sizeof(T));
+		_objects = (T *) std::malloc(NumEntries * sizeof(T));
 		assert(_objects != nullptr);
 
 		_queue = (queue_t *) std::malloc(sizeof(queue_t));
 		assert(_queue != nullptr);
 
 		new (_queue) queue_t();
-		for (int i = 0; i < NUM_ENTRIES; ++i) {
+		for (int i = 0; i < NumEntries; ++i) {
 			_queue->push(&_objects[i]);
 		}
 	}

@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2023 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -94,13 +94,13 @@ void Polling::pollQueues(void *data)
 	assert(numQueues <= _env.maxQueues);
 
 	gaspi_number_t completedReqs, r;
-	gaspi_status_t statuses[NREQ];
-	gaspi_tag_t tags[NREQ];
+	gaspi_status_t statuses[BatchSize];
+	gaspi_tag_t tags[BatchSize];
 	gaspi_return_t eret;
 
 	for (; queue < numQueues; ++queue) {
 		do {
-			eret = gaspi_request_wait(queue, NREQ, &completedReqs, tags, statuses, GASPI_TEST);
+			eret = gaspi_request_wait(queue, BatchSize, &completedReqs, tags, statuses, GASPI_TEST);
 			if (eret != GASPI_SUCCESS && eret != GASPI_TIMEOUT) {
 				// We are probably cheking queues that are not created
 				if (eret != GASPI_ERR_INV_QUEUE) {
@@ -110,7 +110,7 @@ void Polling::pollQueues(void *data)
 				completedReqs = 0;
 				continue;
 			}
-			assert(completedReqs <= NREQ);
+			assert(completedReqs <= BatchSize);
 
 			for (r = 0; r < completedReqs; ++r) {
 				if (statuses[r].error != GASPI_SUCCESS) {
@@ -125,7 +125,7 @@ void Polling::pollQueues(void *data)
 					TaskingModel::decreaseTaskEventCounter(eventCounter, 1);
 				}
 			}
-		} while (completedReqs == NREQ);
+		} while (completedReqs == BatchSize);
 	}
 }
 

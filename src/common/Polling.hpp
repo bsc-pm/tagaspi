@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2023 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef POLLING_HPP
@@ -27,7 +27,7 @@ private:
 	};
 
 	//! Number of requests checked per gaspi_request_wait call
-	static const unsigned int NREQ = 64;
+	static constexpr unsigned int BatchSize = 64;
 
 	//! The information for each GASPI queues polling instance
 	static std::vector<QueuePollingInfo> _queuePollingInfos;

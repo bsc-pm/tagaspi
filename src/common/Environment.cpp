@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2018-2023 Barcelona Supercomputing Center (BSC)
 */
 
 #include <GASPI.h>
@@ -45,7 +45,7 @@ void Environment::initialize()
 	_env.waitingRangeLists = new WaitingRangeList[_env.maxSegments];
 	assert(_env.waitingRangeLists != nullptr);
 
-	_env.maxQueueGroups = MAX_QUEUE_GROUPS;
+	_env.maxQueueGroups = MaxQueueGroups;
 	_env.numQueueGroups = 0;
 
 	gaspi_operation_get_num_requests(GASPI_OP_READ, 1, &_env.numRequests[Operation::READ]);

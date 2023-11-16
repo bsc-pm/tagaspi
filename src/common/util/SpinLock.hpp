@@ -1,7 +1,7 @@
 /*
 	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 
-	Copyright (C) 2019-2021 Barcelona Supercomputing Center (BSC)
+	Copyright (C) 2019-2023 Barcelona Supercomputing Center (BSC)
 */
 
 #ifndef SPIN_LOCK_HPP
@@ -15,7 +15,7 @@ namespace tagaspi {
 
 class SpinLock {
 private:
-	const static size_t Size = MAX_SYSTEM_CPUS;
+	static constexpr size_t Size = MAX_SYSTEM_CPUS;
 
 	alignas(CACHELINE_SIZE) util::Padded<std::atomic<size_t> > _buffer[Size];
 	alignas(CACHELINE_SIZE) std::atomic<size_t> _head;
