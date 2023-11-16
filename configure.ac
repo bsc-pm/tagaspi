@@ -3,10 +3,10 @@
 
 #	This file is part of Task-Aware GASPI and is licensed under the terms contained in the COPYING and COPYING.LESSER files.
 #
-#	Copyright (C) 2018-2021 Barcelona Supercomputing Center (BSC)
+#	Copyright (C) 2018-2023 Barcelona Supercomputing Center (BSC)
 
 AC_PREREQ([2.69])
-AC_INIT([Task-aware GASPI library], [2021.11], [pm-tools@bsc.es])
+AC_INIT([tagaspi], [2.0], [pm-tools@bsc.es])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src])
