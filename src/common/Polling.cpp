@@ -23,24 +23,36 @@
 
 namespace tagaspi {
 
-EnvironmentVariable<uint64_t> Polling::_queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 1);
-EnvironmentVariable<uint64_t> Polling::_pollingFrequency("TAGASPI_POLLING_FREQUENCY", 100);
-Polling::QueuePollingInfo *Polling::_queuePollingInfos;
+std::vector<Polling::QueuePollingInfo> Polling::_queuePollingInfos;
 TaskingModel::polling_handle_t Polling::_notificationsPollingHandle;
 
 void Polling::initialize()
 {
 	assert(_env.maxQueues > 0);
-	assert(_queuePollingInstances > 0);
+	assert(queuePollingInstances > 0);
 
-	_queuePollingInfos = new QueuePollingInfo[_queuePollingInstances];
-	assert(_queuePollingInfos != nullptr);
+	// The TAGASPI_QUEUE_CHECKERS envar determines the number of polling instances
+	// to check progress and completion of queues
+	EnvironmentVariable<uint64_t> queuePollingInstances("TAGASPI_QUEUE_CHECKERS", 1);
 
-	gaspi_number_t qppi = _env.maxQueues / _queuePollingInstances;
-	gaspi_number_t remq = _env.maxQueues % _queuePollingInstances;
+	_queuePollingInfos.resize(queuePollingInstances);
+
+	gaspi_number_t qppi = _env.maxQueues / queuePollingInstances;
+	gaspi_number_t remq = _env.maxQueues % queuePollingInstances;
+
+	// The TAGASPI_POLLING_PERIOD envar determines the period in which TAGASPI
+	// will check its internal requests. If not defined, the period is 100us
+	// as a default value. The TAGASPI_POLLING_FREQUENCY is deprecated now
+	EnvironmentVariable<uint64_t> periodEnvar("TAGASPI_POLLING_PERIOD", 100);
+	EnvironmentVariable<uint64_t> frequencyEnvar("TAGASPI_POLLING_FREQUENCY");
+
+	// Give always priority to TAGASPI_POLLING_PERIOD
+	uint64_t period = periodEnvar.getValue();
+	if (!periodEnvar.isPresent() && frequencyEnvar.isPresent())
+		period = frequencyEnvar.getValue();
 
 	gaspi_queue_id_t queue = 0;
-	for (gaspi_number_t ins = 0; ins < _queuePollingInstances; ++ins) {
+	for (gaspi_number_t ins = 0; ins < queuePollingInstances; ++ins) {
 		QueuePollingInfo *info = &_queuePollingInfos[ins];
 
 		info->numQueues = qppi + (ins < remq);
@@ -48,30 +60,25 @@ void Polling::initialize()
 			info->firstQueue = queue;
 
 			std::string name = std::string("TAGASPI QUEUES ") + std::to_string(ins);
-			info->pollingHandle = TaskingModel::registerPolling(
-				name.c_str(), pollQueues, info,
-				_pollingFrequency
-			);
+			info->pollingHandle =
+				TaskingModel::registerPolling(name.c_str(), pollQueues, info, period);
 			queue += info->numQueues;
 		}
 	}
 
-	_notificationsPollingHandle = TaskingModel::registerPolling(
-		"TAGASPI NOTIFICATIONS", pollNotifications, nullptr,
-		_pollingFrequency
-	);
+	_notificationsPollingHandle =
+		TaskingModel::registerPolling("TAGASPI NOTIFICATIONS", pollNotifications, nullptr, period);
 }
 
 void Polling::finalize()
 {
-	for (gaspi_number_t ins = 0; ins < _queuePollingInstances; ++ins) {
-		if (_queuePollingInfos[ins].numQueues) {
-			TaskingModel::unregisterPolling(_queuePollingInfos[ins].pollingHandle);
-		}
+	for (QueuePollingInfo &info : _queuePollingInfos) {
+		if (info.numQueues)
+			TaskingModel::unregisterPolling(info.pollingHandle);
 	}
 	TaskingModel::unregisterPolling(_notificationsPollingHandle);
 
-	delete [] _queuePollingInfos;
+	_queuePollingInfos.clear();
 }
 
 void Polling::pollQueues(void *data)
